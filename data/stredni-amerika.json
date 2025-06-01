@@ -1,0 +1,56 @@
+{
+  "category": "zemepis",
+  "name": "střední amerika",
+  "questions": [
+    {
+      "text": "Do jakého souostroví patří Kuba?",
+      "right_answer": "Velké Antily",
+      "other_answers": ["Malé Antily", "Bermudy"]
+    },
+    {
+      "text": "V jaké zemi se nachází sopka Popocatépetl?",
+      "right_answer": "Mexiko",
+      "other_answers": ["Belize", "Nicaragua"]
+    },
+    {
+      "text": "Jaké je hlavní město Jamajky?",
+      "right_answer": "Kingston",
+      "other_answers": ["Managua", "Portmore"]
+    },
+    {
+      "text": "Na jakém ostrově leží Haiti?",
+      "right_answer": "Hispaniola",
+      "other_answers": ["Barbados", "Grenada"]
+    },
+    {
+      "text": "Na jakém ostrově leží pláž Maho, v jejíž těsné blízkosti přistávají letadla?",
+      "right_answer": "Sv. Martin",
+      "other_answers": ["Sv. Kryštof", "Sv. Lucie"]
+    },
+    {
+      "text": "V jaké zemi najdeme ruiny starověkého mayského města Tikal?",
+      "right_answer": "Guatemala",
+      "other_answers": ["Mexiko", "Belize"]
+    },
+    {
+      "text": "Měnou colón zaplatíme v jaké zemi?",
+      "right_answer": "Kostarika",
+      "other_answers": ["Honduras", "Panama"]
+    },
+    {
+      "text": "Jaké je státní zřízení v Hondurasu?",
+      "right_answer": "Prezidentská republika",
+      "other_answers": ["konstituční monarchie", "absolutní monarchie"]
+    },
+    {
+      "text": "Která země kromě Kolumbie má hranici s Panamou?",
+      "right_answer": "Kostarika",
+      "other_answers": ["Nikaragua", "Salvador"]
+    },
+    {
+      "text": "V které zemi můžeme najít koloniální města Granada a León?",
+      "right_answer": "Nicaragua",
+      "other_answers": ["Salvador", "Mexiko"]
+    }
+  ]
+}

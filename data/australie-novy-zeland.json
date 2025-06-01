@@ -1,0 +1,56 @@
+{
+  "category": "zemepis",
+  "name": "austrálie a nový zéland",
+  "questions": [
+    {
+      "text": "Jaké je hlavní město Austrálie?",
+      "right_answer": "Canberra",
+      "other_answers": ["Sydney", "Adelaide"]
+    },
+    {
+      "text": "Jaký je symbol Perthu a celé Západní Austrálie?",
+      "right_answer": "černá labuť",
+      "other_answers": ["Bílý klokan", "tasmánský čert"]
+    },
+    {
+      "text": "Co nebo kdo je quokka?",
+      "right_answer": "Klokan",
+      "other_answers": ["kapsa", "původní obyvatel Austrálie"]
+    },
+    {
+      "text": "Jak se nazývá australský monolit v domorodém jazyce?",
+      "right_answer": "Uluru",
+      "other_answers": ["Uhuru", "Uturuncu"]
+    },
+    {
+      "text": "Jak se nazývá hromadný maorský tanec?",
+      "right_answer": "Haka",
+      "other_answers": ["Hula hula", "Hustle"]
+    },
+    {
+      "text": "Co nemá Nový Zéland na svém území?",
+      "right_answer": "jaderné elektrárny",
+      "other_answers": ["vojenské letiště", "námořní základnu"]
+    },
+    {
+      "text": "95 % těžby jakých polodrahokamů připadá na Austrálii?",
+      "right_answer": "Opálů",
+      "other_answers": ["nefritů", "jaspisů"]
+    },
+    {
+      "text": "Jak se jmenuje hlavní město Tasmánie?",
+      "right_answer": "Hobart",
+      "other_answers": ["Port Arthur", "Launceston"]
+    },
+    {
+      "text": "Kolik zhruba ostrovů má Velký bariérový útes?",
+      "right_answer": "900",
+      "other_answers": ["300", "600"]
+    },
+    {
+      "text": "Jaké je hlavní město Nového Zélandu?",
+      "right_answer": "Wellington",
+      "other_answers": ["Auckland", "Hamilton"]
+    }
+  ]
+}

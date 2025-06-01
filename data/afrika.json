@@ -1,0 +1,56 @@
+{
+  "category": "zemepis",
+  "name": "afrika",
+  "questions": [
+    {
+      "text": "Na které řece se nacházejí Viktoriiny vodopády?",
+      "right_answer": "Zambezi",
+      "other_answers": ["Zambie", "Niger"]
+    },
+    {
+      "text": "Převážná část safari v Serengeti leží v jakém státě?",
+      "right_answer": "Tanzanie",
+      "other_answers": ["Uganda", "JAR"]
+    },
+    {
+      "text": "Jaké je hlavní město Maroka?",
+      "right_answer": "Rabat",
+      "other_answers": ["Casablanca", "Marrákeš"]
+    },
+    {
+      "text": "Která africká řeka je nejvodnatější?",
+      "right_answer": "Kongo",
+      "other_answers": ["Nil", "Niger"]
+    },
+    {
+      "text": "Čím se vyznačují pygmejové?",
+      "right_answer": "nízkou výškou",
+      "other_answers": ["Protáhlou hlavou", "dlouhými krky"]
+    },
+    {
+      "text": "Na kterém místě v Africe žijí lemuři?",
+      "right_answer": "Madagaskar",
+      "other_answers": ["Zanzibar", "Tanzanie"]
+    },
+    {
+      "text": "Co odděluje Afriku od Asie?",
+      "right_answer": "Suezský průplav",
+      "other_answers": ["Atlantský oceán", "obratník Raka"]
+    },
+    {
+      "text": "V jakém státě se nachází Kilimandžáro?",
+      "right_answer": "Tanzanie",
+      "other_answers": ["Keňa", "Uganda"]
+    },
+    {
+      "text": "Odkud pochází kávovník?",
+      "right_answer": "Etiopie",
+      "other_answers": ["Keňa", "Súdán"]
+    },
+    {
+      "text": "Jediným sousedem Leshota je jaká země?",
+      "right_answer": "Jihoafrická republika",
+      "other_answers": ["Botswana", "Namibie"]
+    }
+  ]
+}

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Geografie Kvízy</title>
+    <style>
+        /* --------------------- Existing CSS (no changes) --------------------- */
+        body {
+            margin: 0;
+            font-family: sans-serif;
+            line-height: 1.4;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        main {
+            flex: 1;
+            padding: 1rem;
+        }
+        section {
+            display: none;
+        }
+        section.active {
+            display: block;
+        }
+        #quiz-screen article {
+            margin-bottom: 1rem;
+        }
+        #choices-list {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+        #choices-list button {
+            width: 100%;
+            padding: 0.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 0.25rem;
+            transition: background 0.3s;
+        }
+        #choices-list button:hover {
+            background: #ecf0f1;
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        #progress-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        #progress-text {
+            font-weight: bold;
+        }
+        #progress-bar {
+            width: 50%;
+            height: 1rem;
+        }
+        #timer {
+            font-size: 1rem;
+            background: #e74c3c;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+        }
+        footer {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        canvas {
+            display: block;
+            margin: 1rem auto;
+            border: 1px solid #ccc;
+        }
+        @media (max-width: 600px) {
+            #choices-list {
+                grid-template-columns: 1fr;
+            }
+            #progress-container {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            #progress-bar {
+                width: 100%;
+            }
+        }
+
+        /* -------------------- Home & Quiz List CSS -------------------- */
+        nav.quiz-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        nav.quiz-list button {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            background: #3498db;
+            color: white;
+            transition: transform 0.2s;
+            flex-grow: 1;
+            max-width: 200px;
+            text-align: center;
+        }
+        nav.quiz-list button:hover {
+            transform: scale(1.05);
+        }
+        #home-controls {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        #create-quiz-btn,
+        #import-quiz-btn,
+        #manage-quizzes-btn,
+        #view-scores-btn {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            margin: 0.25rem;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            background: #f39c12;
+            color: white;
+        }
+        #create-quiz-btn:hover,
+        #import-quiz-btn:hover,
+        #manage-quizzes-btn:hover,
+        #view-scores-btn:hover {
+            filter: brightness(0.9);
+        }
+
+        /* -------------------- Control Panel CSS -------------------- */
+        #control-panel-screen h2 {
+            text-align: center;
+        }
+        #control-panel-list {
+            list-style: none;
+            padding: 0;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        #control-panel-list li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #ccc;
+            padding: 0.5rem 0;
+        }
+        #control-panel-list li:last-child {
+            border-bottom: none;
+        }
+        .control-quiz-name {
+            flex-grow: 1;
+            font-weight: bold;
+        }
+        .control-btn {
+            margin-left: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.9rem;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            background: #3498db;
+            color: white;
+        }
+        .control-btn:hover {
+            filter: brightness(0.9);
+        }
+        .delete-btn {
+            background: #c0392b;
+        }
+        .delete-btn:hover {
+            filter: brightness(0.9);
+        }
+
+        /* -------------------- Authoring CSS (unchanged) -------------------- */
+        #authoring-screen {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        #authoring-screen h2 {
+            text-align: center;
+        }
+        #authoring-form label {
+            display: block;
+            margin: 0.5rem 0 0.25rem;
+            font-weight: bold;
+        }
+        #authoring-form input[type="text"],
+        #authoring-form textarea {
+            width: 100%;
+            padding: 0.5rem;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        #add-question-btn,
+        #save-quiz-btn,
+        #export-quiz-btn {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            margin: 0.5rem 0.25rem;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            background: #27ae60;
+            color: white;
+        }
+        #add-question-btn:hover,
+        #save-quiz-btn:hover,
+        #export-quiz-btn:hover {
+            filter: brightness(0.9);
+        }
+        .question-block {
+            border: 1px solid #ccc;
+            border-radius: 0.25rem;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .question-block h4 {
+            margin: 0 0 0.5rem;
+        }
+        .question-block .remove-question-btn {
+            background: #c0392b;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.9rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            float: right;
+        }
+        .question-block .remove-question-btn:hover {
+            filter: brightness(0.9);
+        }
+        #import-file-input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<header><h1>Geografie Kvízy</h1></header>
+<main>
+    <!-- =================== Home / Quiz selection =================== -->
+    <section id="home-screen" class="active">
+        <div id="home-controls">
+            <label for="player-name">Jméno / Iniciály:&nbsp;</label>
+            <input id="player-name" type="text" maxlength="10" placeholder="Zadejte jméno"/>
+            <button id="view-scores-btn">Zobrazit žebříček</button>
+            <button id="manage-quizzes-btn">Spravovat kvízy</button>
+            <br/>
+            <button id="create-quiz-btn">Vytvořit kvíz</button>
+            <button id="import-quiz-btn">Importovat kvíz</button>
+            <input type="file" id="import-file-input" accept=".json"/>
+        </div>
+
+        <!-- DYNAMIC quiz list: built-in + custom (Play only) -->
+        <nav class="quiz-list"></nav>
+    </section>
+
+    <!-- =================== Quiz screen =================== -->
+    <section id="quiz-screen">
+        <header><h2 id="quiz-title"></h2></header>
+        <div id="progress-container">
+            <span id="progress-text">Otázka 0/0</span>
+            <progress id="progress-bar" value="0" max="0"></progress>
+            <span id="timer">0s</span>
+        </div>
+        <article id="question-card">
+            <p id="question-text"></p>
+            <ul id="choices-list"></ul>
+        </article>
+        <footer>
+            <button id="next-btn" disabled>Další</button>
+        </footer>
+    </section>
+
+    <!-- =================== Results screen =================== -->
+    <section id="results-screen">
+        <header><h2>Výsledky</h2></header>
+        <p id="score-text"></p>
+        <canvas id="resultsChart" width="300" height="300"></canvas>
+        <footer>
+            <button id="home-btn">Zpět na domovskou</button>
+        </footer>
+    </section>
+
+    <!-- =================== High‐Score screen =================== -->
+    <section id="scores-screen">
+        <header><h2>Žebříček</h2></header>
+        <ul id="high-score-list"></ul>
+        <footer>
+            <button id="scores-home-btn">Zpět na domovskou</button>
+        </footer>
+    </section>
+
+    <!-- =================== Control Panel screen (NEW) =================== -->
+    <section id="control-panel-screen">
+        <header><h2>Správa vlastních kvízů</h2></header>
+        <ul id="control-panel-list"></ul>
+        <footer>
+            <button id="control-home-btn">Zpět na domovskou</button>
+        </footer>
+    </section>
+
+    <!-- =================== Authoring screen =================== -->
+    <section id="authoring-screen">
+        <header><h2>Vytvořit / Upravit kvíz</h2></header>
+        <form id="authoring-form">
+            <label for="new-quiz-name">Název kvízu:</label>
+            <input id="new-quiz-name" type="text" required maxlength="30"/>
+
+            <div id="questions-container"></div>
+
+            <button type="button" id="add-question-btn">Přidat otázku</button>
+            <br/>
+            <button type="button" id="save-quiz-btn">Uložit kvíz</button>
+            <button type="button" id="export-quiz-btn">Exportovat kvíz</button>
+        </form>
+        <footer>
+            <button id="authoring-home-btn">Zpět na domovskou</button>
+        </footer>
+    </section>
+
+    <!-- =================== Audio elements =================== -->
+    <audio id="bgMusic" src="media/background-music.mp3" loop preload="auto"></audio>
+    <audio id="finishSound" src="media/finish-sound.mp3" preload="auto"></audio>
+</main>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
