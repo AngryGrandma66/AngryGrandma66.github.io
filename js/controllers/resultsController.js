@@ -1,5 +1,5 @@
 // js/controllers/resultsController.js
-import { drawResultsChart } from '../chartController.js';
+import { drawResultsChart } from './chartController.js';
 
 export class ResultsController {
     constructor(app) {

@@ -1,5 +1,5 @@
 // js/app.js
-import {initAudio} from './audioController.js';
+import {initAudio} from './controllers/audioController.js';
 import {AppController} from './controllers/appController.js';
 
 window.addEventListener('DOMContentLoaded', () => {

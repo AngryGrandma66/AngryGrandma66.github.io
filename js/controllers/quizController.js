@@ -1,5 +1,5 @@
 // js/quizController.js
-import { loadQuizData } from './dataService.js';
+import { loadQuizData } from '../dataService.js';
 import { playMusic, stopMusic, playFinishSound } from './audioController.js';
 
 const TIME_LIMIT = 15; // default seconds per question

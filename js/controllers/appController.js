@@ -5,7 +5,7 @@ import { ResultsController } from './resultsController.js';
 import { ScoresController } from './scoresController.js';
 import { ControlPanelController } from './controlPanelController.js';
 import { AuthoringController } from './authoringController.js';
-import { QuizController } from '../quizController.js';
+import { QuizController } from './quizController.js';
 import { addScore } from '../scoreService.js';
 import {
     stopMusic,
@@ -13,7 +13,7 @@ import {
     toggleEffectsMute,
     isMusicMuted,
     isEffectsMuted
-} from '../audioController.js';
+} from './audioController.js';
 
 export class AppController {
     constructor() {
