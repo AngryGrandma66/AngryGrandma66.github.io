@@ -4,6 +4,11 @@ import { playMusic, stopMusic, playFinishSound } from './audioController.js';
 
 const TIME_LIMIT = 15;
 
+/**
+ * Construct a new QuizController, wiring up callbacks for loaded quizzes, question renders, and finish.
+ * @param {{onQuizLoaded:Function,onQuestionRendered:Function,onQuizFinished:Function}} callbacks
+ * @constructor
+ */
 export class QuizController {
     constructor({
                     onQuizLoaded,
@@ -23,12 +28,21 @@ export class QuizController {
     }
 
 
+    /**
+     * When media (audio/video) loads, extend the question timer so the player
+     * can listen/watch before time runs out.
+     * @param {number} extraSeconds – additional seconds to add to timeLeft
+     */
     extendTimer(extraSeconds) {
         if (this.questionTimer) {
             this.timeLeft += extraSeconds;
         }
     }
 
+    /**
+     * Stop any running question‐timer, stop background music,
+     * and reset all quiz‐related state (index, score, answers, timeLeft).
+     */
     abortQuiz() {
         if (this.questionTimer) {
             clearInterval(this.questionTimer);
@@ -41,7 +55,11 @@ export class QuizController {
         this.answers      = [];
         this.timeLeft     = 0;
     }
-
+    /**
+     * Load quiz data (builtin or custom) for the given topic ID,
+     * initialize counters, start background music, and render first question.
+     * @param {string} topic – the quiz file/key to load (e.g. "afrika" or a custom ID)
+     */
     startQuiz(topic) {
         if (this.currentQuiz) {
             this.abortQuiz();
@@ -63,6 +81,13 @@ export class QuizController {
     }
 
 
+    /**
+     * Show the next question on screen, reset and start the countdown timer,
+     * and invoke the UI callback so that UI can update question text,
+     * choices, progress, and attach media element if present.
+     * This method is called internally whenever we move to a new question.
+     * @Private helper—naming convention: underscore = “internal only.”
+     */
     _renderCurrentQuestion() {
         clearInterval(this.questionTimer);
 
@@ -94,7 +119,12 @@ export class QuizController {
         }, 1000);
     }
 
-
+    /**
+     * Called when user clicks on a choice button.
+     * Clears the countdown timer, records whether that choice was correct,
+     * updates the correctCount if needed, and signals the UI to show feedback.
+     * @param {number} chosenIndex – index of the clicked choice
+     */
     selectAnswer(chosenIndex) {
         clearInterval(this.questionTimer);
         const qObj = this.currentQuiz.questions[this.currentIndex];
@@ -113,7 +143,13 @@ export class QuizController {
         });
     }
 
-
+    /**
+     * Called when the timer reaches zero without a selection.
+     * Record a “false” (wrong) answer and send a render event to the UI
+     * indicating a timed‐out state so that “next” button appears and choices
+     * get disabled.
+     * @Private helper.
+     */
     _autoSkip() {
         this.answers.push(false);
         this.onQuestionRendered({
@@ -125,7 +161,11 @@ export class QuizController {
         });
     }
 
-
+    /**
+     * Advance to the next question. If there are still unanswered questions,
+     * render the next one; otherwise, stop music, play finish‐sound, compute
+     * correct/incorrect totals, and invoke the “quiz finished” callback.
+     */
     nextQuestion() {
         clearInterval(this.questionTimer);
         this.currentIndex++;

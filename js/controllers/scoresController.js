@@ -1,5 +1,11 @@
 import { getTopScores } from '../scoreService.js';
 
+
+/**
+ * Bind references to the high‐score list <ul> and “Back to Home” button,
+ * and attach the home button listener.
+ * @param {AppController} app – parent application controller
+ */
 export class ScoresController {
     constructor(app) {
         this.app = app;
@@ -13,6 +19,14 @@ export class ScoresController {
         });
     }
 
+    /**
+     * Build and display the top‐10 scores:
+     *   – Call getTopScores(10) from scoreService
+     *   – If list is empty, show “Žádné výsledky zatím”
+     *   – Otherwise, for each entry, format date/time in Czech locale,
+     *     and append “Name – Quiz – correct/total (dd.mm.rr hh:mm:ss)” to <li>
+     *   – Switch to the scores section
+     */
     show() {
         const topEntries = getTopScores(10);
         this.highScoreList.innerHTML = '';

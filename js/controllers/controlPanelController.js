@@ -1,5 +1,11 @@
 import { getAllCustomQuizzes, getCustomQuiz, deleteCustomQuiz } from '../dataService.js';
 
+/**
+ * Build the “Control Panel” screen (Manage custom quizzes).
+ * Store ref to the <ul> where each custom quiz will be listed,
+ * and bind the “Back to Home” button.
+ * @param {AppController} app – parent app controller
+ */
 export class ControlPanelController {
     constructor(app) {
         this.app = app;
@@ -12,6 +18,17 @@ export class ControlPanelController {
         });
     }
 
+    /**
+     * Populate the control‐panel list:
+     *   • If no custom quizzes, show a placeholder “No custom quizzes.”
+     *   • Otherwise, for each custom quiz ID+name, append a <li> with:
+     *       – Name label
+     *       – “Play” button → calls app.startQuiz(id, name)
+     *       – “Edit” button → loads quiz data into AuthoringController
+     *       – “Export” button → triggers download of JSON
+     *       – “Delete” button → confirm & remove from localStorage
+     * Then switch to the control‐panel section.
+     */
     show() {
         this.controlPanelList.innerHTML = '';
         const custom = getAllCustomQuizzes();

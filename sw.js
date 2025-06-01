@@ -1,4 +1,9 @@
-
+/**
+ * Service Worker for geo‐quiz:
+ *   • On install: cache all specified assets for offline use
+ *   • On activate: remove old caches
+ *   • On fetch: respond from cache first, fall back to network, then cache new GET requests
+ */
 const CACHE_NAME = 'geo-quiz-v1';
 
 const ASSETS_TO_CACHE = [
@@ -40,7 +45,10 @@ const ASSETS_TO_CACHE = [
     '/data/kanada-usa.json',
     '/data/stredni-amerika.json'
 ];
-
+/**
+ * During installation, open CACHE_NAME and add all URLs in ASSETS_TO_CACHE.
+ * Then call skipWaiting() so SW takes control immediately.
+ */
 self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
@@ -48,7 +56,10 @@ self.addEventListener('install', event => {
             .then(() => self.skipWaiting())
     );
 });
-
+/**
+ * On activation, delete any caches not named CACHE_NAME,
+ * then claim clients so pages load under this SW without reload.
+ */
 self.addEventListener('activate', event => {
     event.waitUntil(
         caches.keys().then(keys =>
@@ -60,9 +71,14 @@ self.addEventListener('activate', event => {
         ).then(() => self.clients.claim())
     );
 });
-
+/**
+ * Intercept fetch requests:
+ *   1) If resource is in cache, return it.
+ *   2) Otherwise, fetch from network.
+ *      • If GET and network response is OK/basic, clone it into the cache.
+ *   3) If network fails, log an error (no custom offline fallback here).
+ */
 self.addEventListener('fetch', event => {
-    const requestURL = new URL(event.request.url);
 
     event.respondWith(
         caches.match(event.request).then(cachedResponse => {

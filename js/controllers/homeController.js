@@ -1,6 +1,13 @@
-
 import { getAllCustomQuizzes } from '../dataService.js';
 
+/**
+ * Build the “Home” screen: attach listener to
+ *   - player‐name input (enabling/disabling quiz buttons)
+ *   - “Create quiz” and “Import quiz” buttons
+ *   - Insert a small error div to show “please enter name” messages
+ * Then call buildQuizList() to populate built‐in + custom quizzes.
+ * @param {AppController} app – parent application controller
+ */
 export class HomeController {
     constructor(app) {
         this.app = app;
@@ -55,12 +62,25 @@ export class HomeController {
         }
     }
 
-
+    /**
+     * Return the trimmed value of the player‐name input,
+     * or an empty string if nothing was entered.
+     * Used to determine if play buttons should be enabled.
+     * @returns {string}
+     */
     getPlayerName() {
         return this.playerNameInput.value.trim();
     }
 
 
+    /**
+     * Clear and re‐create the list of available quizzes:
+     *   1) Seven built‐in topics (afrika, evropa, etc.)
+     *   2) If any custom quizzes exist in localStorage, add a divider
+     *      and then list them.
+     * Each button is disabled if no player name is present,
+     * and clicking it calls AppController.startQuiz(...) with the ID and label.
+     */
     buildQuizList() {
         this.quizListNav.innerHTML = '';
         this._hasTriedStart = false;

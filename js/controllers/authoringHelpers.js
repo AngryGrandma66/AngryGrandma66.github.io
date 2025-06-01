@@ -1,7 +1,21 @@
 
 
 import { getAllCustomQuizzes, saveCustomQuiz } from '../dataService.js';
-
+/**
+ * Build the HTML structure for one question block:
+ *   – A heading “Otázka X” with a remove‐button
+ *   – <textarea> for question text plus a validation‐error <div>
+ *   – <input> for correct answer plus validation error <div>
+ *   – <input> for “other answers” (comma‐separated) plus validation error <div>
+ *   – <div> to show media preview if prefill.media exists
+ *   – <input type="file"> for user to add new audio/video
+ *   – <div> to show media‐error messages
+ * If prefill is provided, fill in existing question fields and display media (audio/video element).
+ * Attach an event listener to the remove button to delete this block from questionsContainer.
+ * @param {number} qid – numeric identifier for this question block
+ * @param {HTMLElement} questionsContainer – where to append the block
+ * @param {Object|null} prefill – optional existing question data
+ */
 export function addQuestionBlockHTML(qid, questionsContainer, prefill = null) {
     const wrapper = document.createElement('div');
     wrapper.classList.add('question-block');
@@ -77,18 +91,33 @@ export function addQuestionBlockHTML(qid, questionsContainer, prefill = null) {
     return wrapper;
 }
 
+/**
+ * Clear any text in the quiz‐name or import‐error <div>, resetting it to red color.
+ * Used before showing new validation errors.
+ * @param {HTMLDivElement} nameErrorDiv
+ */
 export function clearNameError(nameErrorDiv) {
     nameErrorDiv.textContent = '';
     nameErrorDiv.style.color = 'red';
 }
 
+/**
+ * Find every .field-error DIV inside questionsContainer (for text/correct/other/media),
+ * and clear its textContent. Useful before re‐running validation on all blocks.
+ * @param {HTMLElement} questionsContainer
+ */
 export function clearAllQuestionErrors(questionsContainer) {
     const allErrors = questionsContainer.querySelectorAll('.field-error');
     allErrors.forEach((errDiv) => {
         errDiv.textContent = '';
     });
 }
-
+/**
+ * Check that quizName is non‐empty and ≤ 30 characters.
+ * Return { hasNameError: boolean, nameErrorMsg: string } to show under name input.
+ * @param {string} quizName
+ * @returns {{hasNameError:boolean, nameErrorMsg:string}}
+ */
 export function validateQuizName(quizName) {
     if (!quizName) {
         return { hasNameError: true, nameErrorMsg: 'Název kvízu nesmí být prázdný.' };
@@ -98,7 +127,23 @@ export function validateQuizName(quizName) {
     }
     return { hasNameError: false, nameErrorMsg: '' };
 }
-
+/**
+ * Validate each question DOM block. For each:
+ *   – text must be ≥ 5 chars
+ *   – correctAnswer must be non‐empty
+ *   – otherAnswers must parse into ≥ 2 unique, non‐empty strings
+ *   – correctAnswer cannot appear among otherAnswers
+ *   – media file if uploaded must be type audio/* or video/*, ≤ 5 MB
+ * For each block, collect a Promise:
+ *   – If a user‐uploaded File is present, read it via FileReader → Data URL,
+ *     resolve { type: "audio"|"video", url: dataURL }
+ *   – Otherwise if prefill URL exists in dataset, resolve that { type, url }
+ *   – Else, resolve null
+ * Return { hasFieldErrors: boolean, mediaPromises: Array<Promise> } so caller
+ * can wait for all Data URLs before assembling final questions array.
+ * @param {HTMLDivElement[]} blocks – NodeList/Array of .question-block elements
+ * @returns {{hasFieldErrors:boolean, mediaPromises:Promise<({type:string,url:string}|null)>[]}}
+ */
 export function validateAllQuestionBlocks(blocks) {
     let hasFieldErrors = false;
     const mediaPromises = [];
@@ -202,6 +247,15 @@ export function validateAllQuestionBlocks(blocks) {
     return { hasFieldErrors, mediaPromises };
 }
 
+/**
+ * Take each question block and the corresponding element in mediaArray (from validateAllQuestionBlocks),
+ * then build a “questions” array of plain objects:
+ *   { text, right_answer, other_answers: string[], media?:{ type, url } }
+ * Return that array for saving/exporting.
+ * @param {HTMLDivElement[]} blocks – array of block elements
+ * @param {Array<{type:string,url:string}|null>} mediaArray – same length as blocks
+ * @returns {Array<Object>}
+ */
 export function assembleQuestionsArray(blocks, mediaArray) {
     const questions = [];
     let idx = 0;
@@ -233,6 +287,12 @@ export function assembleQuestionsArray(blocks, mediaArray) {
     return questions;
 }
 
+/**
+ * Display a green success message (e.g. “Quiz XY saved”) in nameErrorDiv for 3 seconds,
+ * then clear it and reset color to red so it’s ready for future errors.
+ * @param {HTMLDivElement} nameErrorDiv – where to show the message
+ * @param {string} message – text to display in green
+ */
 export function showTemporarySuccessMessage(nameErrorDiv, message) {
     nameErrorDiv.style.color = 'green';
     nameErrorDiv.textContent = message;
@@ -241,7 +301,20 @@ export function showTemporarySuccessMessage(nameErrorDiv, message) {
         nameErrorDiv.style.color = 'red';
     }, 3000);
 }
-
+/**
+ * Read a .json file from the “Import quiz” input:
+ *   – Parse JSON, validate that raw.name is a non‐empty string
+ *   – Validate that raw.questions is a non‐empty array
+ *   – For each question, verify text ≥ 5 chars, right_answer non‐empty,
+ *     other_answers is ≥ 2 unique non‐empty strings, right_answer not among them,
+ *     and if media exists, media.url must be a data: URL, media.type must be "audio" or "video"
+ *   – If any check fails, show an appropriate error message in nameErrorDiv
+ *   – Otherwise, generate a unique quizId (based on file name), save to localStorage,
+ *     show “Imported!” in green, call onSuccess(quizId, raw), and clear file input
+ * @param {Event} event – the file input change event
+ * @param {HTMLDivElement} nameErrorDiv – where to show validation messages
+ * @param {Function} onSuccess – callback(quizId, raw) after successful import
+ */
 export function handleImportFile(event, nameErrorDiv, onSuccess) {
     const file = event.target.files[0];
     if (!file) return;

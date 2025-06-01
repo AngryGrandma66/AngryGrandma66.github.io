@@ -1,4 +1,8 @@
-
+/**
+ * Construct a QuizControllerUI to manage question rendering, button wiring, and timer updates.
+ * @param {AppController} app ‒ the main application controller
+ * @constructor
+ */
 export class QuizControllerUI {
     constructor(app) {
         this.app = app;
@@ -26,7 +30,11 @@ export class QuizControllerUI {
         });
     }
 
-
+    /**
+     * UI callback when quiz data is loaded. Clear any leftover media,
+     * set the quiz title and progress bar length, then show the quiz section.
+     * @param {Object} data – { title: string, questions: Array }
+     */
     handleQuizLoaded(data) {
         this.lastIndex = -1;
 
@@ -37,7 +45,25 @@ export class QuizControllerUI {
             this.progressBarEl.max = data.questions.length;
             this.app.showSection(this.app.quizScreen);
     }
-
+    /**
+     * Update the question screen based on state:
+     *   • question.text, choices array
+     *   • index and total for “Question X/Y”
+     *   • timeLeft for countdown display (and blinking when ≤ 5s)
+     *   • whether media element needs to be re‐created
+     *   • whether a choice has been selected or time has run out
+     *     → disable buttons and color correct/incorrect
+     *   • enable “Next” button only after selection or timeout
+     * @param {Object} state – {
+     *    question: { text, choices, answer, media? },
+     *    index: number, total: number,
+     *    timeLeft: number,
+     *    selected?: boolean,
+     *    isCorrect?: boolean,
+     *    chosenIndex?: number,
+     *    timedOut?: boolean
+     * }
+     */
     renderQuestion(state) {
         const { question, index, total, timeLeft, selected, isCorrect, chosenIndex, timedOut } = state;
         const mediaContainer = document.getElementById('media-container');

@@ -10,7 +10,15 @@ import {
     showTemporarySuccessMessage,
     handleImportFile
 } from './authoringHelpers.js';
-
+/**
+ * Initialize the authoring form:
+ *   • Keep references to DOM elements: quiz name input, questions container, buttons
+ *   • Create and insert a “nameErrorDiv” for inline validation messages
+ *   • Bind click events for Add‐Question, Save‐Quiz, Export‐Quiz, Import‐File
+ *   • “Create quiz” button participates in showing blank authoring screen
+ *   • “Back to Home” button goes back in history
+ * @param {Object} opts.onAuthorSaved – callback to run after a quiz is saved/imported
+ */
 export class AuthoringController {
     constructor({ onAuthorSaved }) {
         this.onAuthorSaved = onAuthorSaved;
@@ -47,6 +55,11 @@ export class AuthoringController {
             window.history.back();
         });  }
 
+
+    /**
+     * Show a blank authoring form for creating a new quiz: clear name, questions, and reset counters.
+     * @private
+     */
     _showAuthoringScreen() {
         this.currentRawQuiz    = null;
         this.currentQuizId     = null;
@@ -62,6 +75,17 @@ export class AuthoringController {
     }
 
 
+    /**
+     * Prefill the authoring form with a saved quiz:
+     *   • Set currentQuizId and store raw object
+     *   • Put quiz name into input
+     *   • For each question in prefillRaw.questions, call
+     *     addQuestionBlockHTML to generate a block (text, correct, others, media preview)
+     *   • Clear any existing validation messages
+     *   • Show the authoring section
+     * @param {string} quizId – the key under which this custom quiz is stored
+     * @param {Object} prefillRaw – the raw quiz data { name, questions: […] }
+     */
     loadQuizForEdit(quizId, prefillRaw) {
         this.currentQuizId  = quizId;
         this.currentRawQuiz = prefillRaw;
@@ -79,11 +103,29 @@ export class AuthoringController {
         clearAllQuestionErrors(this.questionsContainer);
         this.authoringScreen.classList.add('active');
     }
-
+    /**
+     * Create one “question‐block” UI element (with text area, inputs for correct/other answers, optional media preview),
+     * then append it to the questionsContainer.
+     * If prefill is provided, fill in fields and show existing media preview.
+     * @param {Object|null} prefill – a question object from raw quiz (optional)
+     */
     _addQuestionBlock(prefill = null) {
         addQuestionBlockHTML(this.nextQuestionId++, this.questionsContainer, prefill);
     }
 
+    /**
+     * Validate the quiz:
+     *   1) Ensure quiz name is non‐empty and ≤ 30 chars
+     *   2) Ensure there’s at least one question block
+     *   3) For each question block, run validateAllQuestionBlocks to:
+     *       – Check non‐empty question text (≥ 5 chars)
+     *       – Check correct answer is non‐empty
+     *       – Check at least 2 “other answers,” no duplicates, and correctAnswer not among them
+     *       – Check uploaded media is ≤ 5 MB and an audio/video type
+     *   4) If there are media files, read them as Data URLs asynchronously (promises)
+     * Once validation passes, assemble a raw quiz object, persist it to localStorage (saveCustomQuiz),
+     * show a green “quiz saved” message for 3s, and call onAuthorSaved() so HomeController can rebuild its list.
+     */
     _saveQuiz() {
         clearNameError(this.nameErrorDiv);
         clearAllQuestionErrors(this.questionsContainer);
@@ -140,7 +182,14 @@ export class AuthoringController {
                 }
             });
     }
-
+    /**
+     * Derive a safe ID from the quizName:
+     *   – Lowercase, replace spaces with dashes, strip invalid chars
+     *   – If that ID already exists in localStorage, append -1, -2, etc.
+     * Return a new unique string to use as the custom quiz key.
+     * @param {string} quizName
+     * @returns {string}
+     */
     _generateUniqueQuizId(quizName) {
         let baseId = quizName
             .toLowerCase()
@@ -155,7 +204,10 @@ export class AuthoringController {
         }
         return quizId;
     }
-
+    /**
+     * If currentRawQuiz exists, stringify it and trigger a download via a temporary <a> element.
+     * If not saved yet, display an error under the name input.
+     */
     _exportCurrentQuiz() {
         if (!this.currentRawQuiz || !this.currentQuizId) {
             this.nameErrorDiv.textContent = 'Nejdříve uložte kvíz pomocí “Uložit kvíz.”';
@@ -175,6 +227,15 @@ export class AuthoringController {
         URL.revokeObjectURL(url);
     }
 
+    /**
+     * When the user selects a JSON file in “Import quiz,” read it via FileReader,
+     * validate its structure (name must be non‐empty string, questions array must be non‐empty, etc.),
+     * ensure each question object has valid text, right_answer, other_answers, and optional media fields;
+     * if valid, generate a unique ID and call saveCustomQuiz → localStorage, show a “Quiz imported” message in green,
+     * call onSuccess so HomeController can update its list.
+     * If any validation fails, show an appropriate error in nameErrorDiv.
+     * @param {Event} event – the change event on the file input
+     */
     _handleFileImport(event) {
         handleImportFile(
             event,

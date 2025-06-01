@@ -13,7 +13,10 @@ import {
     isMusicMuted,
     isEffectsMuted
 } from './audioController.js';
-
+/**
+ * Create the main application controller, wire up navigation and initialize sub‐controllers.
+ * @constructor
+ */
 export class AppController {
     constructor() {
 
@@ -94,8 +97,10 @@ export class AppController {
         this.showSection(this.homeScreen);
     }
 
-    /** Hide all sections, then show exactly the one passed in. */
-    showSection(sectionEl) {
+    /**
+     * Hide all screens and show just the given section element.
+     * @param {HTMLElement} sectionEl ‒ the section to display
+     */    showSection(sectionEl) {
         [
             this.homeScreen,
             this.quizScreen,
@@ -106,8 +111,11 @@ export class AppController {
         ].forEach(sec => sec.classList.toggle('active', sec === sectionEl));
     }
 
-    /** Called when user clicks “Play” on any screen; starts the quiz. */
-    startQuiz(topicId, titleLabel) {
+    /**
+     * Abort any ongoing quiz, stop music, record the chosen player name, and start a new quiz.
+     * @param {string} topicId ‒ identifier of the quiz to start
+     * @param {string} titleLabel ‒ display title for the quiz
+     */    startQuiz(topicId, titleLabel) {
         this.quizLogic.abortQuiz();
         stopMusic();
         this.currentPlayer   = this.homeCtrl.getPlayerName();
@@ -118,12 +126,11 @@ export class AppController {
         this.quizLogic.startQuiz(topicId);
     }
 
-    /** Called when quiz JSON is loaded (delegated to quizUI). */
-    handleQuizLoaded(data) {
-        this.showSection(this.quizScreen);
-    }
 
-    /** Called after quiz finishes (delegated to results). */
+    /**
+     * After the quiz ends, compute results, store the score, and advance to the results screen.
+     * @param {{correctCount:number, incorrectCount:number}} resultsObj ‒ counts of correct vs. incorrect answers
+     */
     handleResults(resultsObj) {
         const { correctCount, incorrectCount } = resultsObj;
         const total     = correctCount + incorrectCount;
@@ -141,37 +148,46 @@ export class AppController {
         this.resultsCtrl.show(resultsObj );
     }
 
-    /** Show the high‐scores screen. */
-    showScores() {
+    /**
+     * Abort any ongoing quiz and show the high‐score screen.
+     */    showScores() {
         this.quizLogic.abortQuiz();
         stopMusic();
         history.pushState({ page: 'scores' }, '', window.location);
         this.scoresCtrl.show();
     }
 
-    /** Show the control‐panel (manage custom quizzes). */
-    showControlPanel() {
+    /**
+     * Abort any ongoing quiz and show the control‐panel screen for editing custom quizzes.
+     */    showControlPanel() {
         this.quizLogic.abortQuiz();
         stopMusic();
         history.pushState({ page: 'control' }, '', window.location);
         this.controlPanelCtrl.show();
     }
 
-    /** Show a blank authoring screen (“Create Quiz”). */
-    showAuthoringBlank() {
+    /**
+     * Show an empty authoring form for creating a brand‐new quiz.
+     */    showAuthoringBlank() {
         history.pushState({ page: 'authoring' }, '', window.location);
         this.showSection(this.authoringScreen);
         this.authoringCtrl.loadQuizForEdit(null, null);
     }
 
-    /** Show the authoring form filled with an existing quiz. */
+    /**
+     * Show the authoring form pre‐filled with an existing quiz for editing.
+     * @param {string} id ‒ the quiz ID to edit
+     * @param {Object} raw ‒ the raw quiz object to prefill
+     */
     showAuthoringEdit(id, raw) {
         history.pushState({ page: 'authoring' }, '', window.location);
         this.showSection(this.authoringScreen);
         this.authoringCtrl.loadQuizForEdit(id, raw);
     }
 
-    /** Navigate back to Home (rebuild list). */
+    /**
+     * Abort any ongoing quiz, rebuild the home quiz list, and show the home screen.
+     */
     backToHome() {
                this.quizLogic.abortQuiz();
                stopMusic();
@@ -181,7 +197,12 @@ export class AppController {
                 this.showSection(this.homeScreen);
     }
 
-    /** Handle browser back/forward. */
+
+    /**
+     * Handle browser back/forward navigation events.
+     * @param {PopStateEvent} event ‒ the popstate event object
+     * @private
+     */
     _onPopState(event) {
         const state = event.state;
         if (!state || state.page === 'home') {

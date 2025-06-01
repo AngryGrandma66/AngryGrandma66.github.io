@@ -1,3 +1,9 @@
+/**
+ * Draw a combined bar‐and‐pie chart on the given <canvas> to show correct vs. incorrect counts.
+ * @param {HTMLCanvasElement} canvasEl ‒ the canvas where the chart will be drawn
+ * @param {number} correctCount ‒ number of correct answers
+ * @param {number} incorrectCount ‒ number of incorrect answers
+ */
 export function drawResultsChart(canvasEl, correctCount, incorrectCount) {
     const ctx = canvasEl.getContext('2d');
     const w = canvasEl.width;

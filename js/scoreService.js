@@ -1,6 +1,11 @@
 
 const STORAGE_KEY = 'quizHighScores';
 
+/**
+ * Retrieve the high‐score array from localStorage (STORAGE_KEY).
+ * If missing or invalid JSON, return an empty array.
+ * @returns {Array<{name:string,quiz:string,correct:number,total:number,timestamp:number}>}
+ */
 export function getScores() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
@@ -12,6 +17,14 @@ export function getScores() {
     }
 }
 
+/**
+ * Add or update a player’s score entry:
+ *   – If there’s no existing entry with same name+quiz, push newEntry.
+ *   – If there is, compare new percentage (correct/total) vs old:
+ *       → If newPct > oldPct, overwrite. If equal pct but new timestamp < old timestamp, overwrite.
+ *   – Finally, save updated array back to localStorage.
+ * @param {{name:string,quiz:string,correct:number,total:number,timestamp:number}} newEntry
+ */
 export function addScore(newEntry) {
     const all = getScores();
 
@@ -33,9 +46,6 @@ export function addScore(newEntry) {
         if (newPct > oldPct) {
 
             all[idx] = newEntry;
-        } else if (newPct === oldPct && newEntry.timestamp < existing.timestamp) {
-
-            all[idx] = newEntry;
         }
 
     }
@@ -43,7 +53,14 @@ export function addScore(newEntry) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
 }
 
-
+/**
+ * Return the top “limit” entries sorted by:
+ *   1) descending correct count
+ *   2) ascending timestamp (earlier run wins ties)
+ *
+ * @param {number} [limit=10]
+ * @returns {Array}
+ */
 export function getTopScores(limit = 10) {
     const scores = getScores();
     scores.sort((a, b) => {
@@ -52,11 +69,5 @@ export function getTopScores(limit = 10) {
         }
         return a.timestamp - b.timestamp;
     });
-    return scores.slice(0, limit);
-}
-
-export function getRecentScores(limit = 10) {
-    const scores = getScores();
-    scores.sort((a, b) => b.timestamp - a.timestamp);
     return scores.slice(0, limit);
 }
