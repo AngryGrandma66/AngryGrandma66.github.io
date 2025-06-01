@@ -1,15 +1,13 @@
-// js/controllers/scoresController.js
 import { getTopScores } from '../scoreService.js';
 
 export class ScoresController {
     constructor(app) {
         this.app = app;
 
-        // Grab Scores screen elements
         this.highScoreList = document.getElementById('high-score-list');
         this.scoresHomeBtn = document.getElementById('scores-home-btn');
 
-        // Home button on Scores
+
         this.scoresHomeBtn.addEventListener('click', () => {
             this.app.backToHome();
         });

@@ -1,8 +1,8 @@
-// js/quizController.js
+
 import { loadQuizData } from '../dataService.js';
 import { playMusic, stopMusic, playFinishSound } from './audioController.js';
 
-const TIME_LIMIT = 15; // default seconds per question
+const TIME_LIMIT = 15;
 
 export class QuizController {
     constructor({
@@ -22,22 +22,13 @@ export class QuizController {
         this.timeLeft      = 0;
     }
 
-    /**
-     * Increase the remaining time for the current question
-     * by extraSeconds. Called by UI when media metadata loads.
-     */
+
     extendTimer(extraSeconds) {
         if (this.questionTimer) {
             this.timeLeft += extraSeconds;
         }
     }
 
-    /**
-     * Abort any ongoing quiz:
-     * - clear the per‐question timer
-     * - stop background music
-     * - reset internal state
-     */
     abortQuiz() {
         if (this.questionTimer) {
             clearInterval(this.questionTimer);
@@ -51,12 +42,7 @@ export class QuizController {
         this.timeLeft     = 0;
     }
 
-    /**
-     * Start a new quiz for `topic`.
-     * If another quiz is already running, abort it first.
-     */
     startQuiz(topic) {
-        // If a quiz is in progress, cancel it before loading a new one
         if (this.currentQuiz) {
             this.abortQuiz();
         }
@@ -76,14 +62,14 @@ export class QuizController {
             });
     }
 
-    /** Internal: render the current question and start its timer */
+
     _renderCurrentQuestion() {
         clearInterval(this.questionTimer);
 
         const totalQ = this.currentQuiz.questions.length;
         const qObj   = this.currentQuiz.questions[this.currentIndex];
 
-        // Initialize timeLeft to TIME_LIMIT (media will add on via extendTimer)
+
         this.timeLeft = TIME_LIMIT;
         this.onQuestionRendered({
             question: qObj,
@@ -92,7 +78,7 @@ export class QuizController {
             timeLeft: this.timeLeft
         });
 
-        // Start countdown
+
         this.questionTimer = setInterval(() => {
             this.timeLeft -= 1;
             this.onQuestionRendered({
@@ -108,10 +94,7 @@ export class QuizController {
         }, 1000);
     }
 
-    /**
-     * Called by UI when user clicks a choice.
-     * @param {number} chosenIndex
-     */
+
     selectAnswer(chosenIndex) {
         clearInterval(this.questionTimer);
         const qObj = this.currentQuiz.questions[this.currentIndex];
@@ -130,7 +113,7 @@ export class QuizController {
         });
     }
 
-    /** Internal: When the timer reaches zero, mark as incorrect. */
+
     _autoSkip() {
         this.answers.push(false);
         this.onQuestionRendered({
@@ -142,14 +125,14 @@ export class QuizController {
         });
     }
 
-    /** Called by UI when “Next” is clicked. */
+
     nextQuestion() {
         clearInterval(this.questionTimer);
         this.currentIndex++;
         if (this.currentIndex < this.currentQuiz.questions.length) {
             this._renderCurrentQuestion();
         } else {
-            // Quiz finished: stop music, play finish sound, then callback
+
             stopMusic();
             playFinishSound();
             const incorrectCount = this.currentQuiz.questions.length - this.correctCount;

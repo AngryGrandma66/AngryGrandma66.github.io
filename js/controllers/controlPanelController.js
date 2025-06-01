@@ -1,15 +1,12 @@
-// js/controllers/controlPanelController.js
 import { getAllCustomQuizzes, getCustomQuiz, deleteCustomQuiz } from '../dataService.js';
 
 export class ControlPanelController {
     constructor(app) {
         this.app = app;
 
-        // Grab Control Panel elements
         this.controlPanelList = document.getElementById('control-panel-list');
         this.controlHomeBtn   = document.getElementById('control-home-btn');
 
-        // Home button on Control Panel
         this.controlHomeBtn.addEventListener('click', () => {
             this.app.backToHome();
         });
@@ -27,13 +24,11 @@ export class ControlPanelController {
             custom.forEach(({ id, name }) => {
                 const li = document.createElement('li');
 
-                // Quiz name
                 const nameSpan = document.createElement('span');
                 nameSpan.textContent = name;
                 nameSpan.classList.add('control-quiz-name');
                 li.appendChild(nameSpan);
 
-                // Play button
                 const playBtn = document.createElement('button');
                 playBtn.textContent = 'Hrát';
                 playBtn.classList.add('control-btn');
@@ -47,7 +42,6 @@ export class ControlPanelController {
                 });
                 li.appendChild(playBtn);
 
-                // Edit button
                 const editBtn = document.createElement('button');
                 editBtn.textContent = 'Upravit';
                 editBtn.classList.add('control-btn');
@@ -61,7 +55,6 @@ export class ControlPanelController {
                 });
                 li.appendChild(editBtn);
 
-                // Export button
                 const exportBtn = document.createElement('button');
                 exportBtn.textContent = 'Export';
                 exportBtn.classList.add('control-btn');
@@ -86,15 +79,14 @@ export class ControlPanelController {
                 });
                 li.appendChild(exportBtn);
 
-                // Delete button
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = 'Smazat';
                 deleteBtn.classList.add('control-btn', 'delete-btn');
                 deleteBtn.addEventListener('click', () => {
                     if (confirm(`Opravdu chcete smazat kvíz “${name}”?`)) {
                         deleteCustomQuiz(id);
-                        this.show();         // refresh Control Panel
-                        this.app.homeCtrl.buildQuizList(); // also refresh Home list
+                        this.show();
+                        this.app.homeCtrl.buildQuizList();
                     }
                 });
                 li.appendChild(deleteBtn);

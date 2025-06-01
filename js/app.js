@@ -1,9 +1,8 @@
-// js/app.js
 import {initAudio} from './controllers/audioController.js';
 import {AppController} from './controllers/appController.js';
 
 window.addEventListener('DOMContentLoaded', () => {
-    // ── Register Service Worker ──
+
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker
             .register('/sw.js')

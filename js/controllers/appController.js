@@ -1,4 +1,3 @@
-// js/controllers/appController.js
 import { HomeController } from './homeController.js';
 import { QuizControllerUI } from './quizControllerUI.js';
 import { ResultsController } from './resultsController.js';
@@ -17,7 +16,7 @@ import {
 
 export class AppController {
     constructor() {
-        // 1) Grab all <section> elements
+
         this.homeScreen         = document.getElementById('home-screen');
         this.quizScreen         = document.getElementById('quiz-screen');
         this.resultsScreen      = document.getElementById('results-screen');
@@ -25,7 +24,6 @@ export class AppController {
         this.controlPanelScreen = document.getElementById('control-panel-screen');
         this.authoringScreen    = document.getElementById('authoring-screen');
 
-        // 2) Instantiate sub‐controllers, passing a reference to “this”
         this.homeCtrl         = new HomeController(this);
         this.quizUI           = new QuizControllerUI(this);
         this.resultsCtrl      = new ResultsController(this);
@@ -35,13 +33,10 @@ export class AppController {
             onAuthorSaved: () => this.homeCtrl.buildQuizList()
         });
 
-        // 3) Wire up “Sound/Theme Controls”
         const musicBtn   = document.getElementById('toggle-music-btn');
         const effectsBtn = document.getElementById('toggle-effects-btn');
 
         function updateMusicIcon(isMuted) {
-            // When muted: hide the note path? (we actually keep it visible, but cross it out)
-            // Hide the note‐slash when unmuted; show it when muted.
             document
                 .getElementById('music-slash')
                 .setAttribute('visibility', isMuted ? 'visible' : 'hidden');
@@ -56,19 +51,15 @@ export class AppController {
                 .setAttribute('visibility', isMuted ? 'visible' : 'hidden');
         }
 
-// ── Music button wiring ──
         if (musicBtn) {
-            // 1) On load, show/hide slash according to existing mute state
             updateMusicIcon(isMusicMuted());
 
-            // 2) On click, toggle and re-draw slash
             musicBtn.addEventListener('click', () => {
                 const nowMuted = toggleMusicMute();
                 updateMusicIcon(nowMuted);
             });
         }
 
-// ── Effects button wiring (unchanged) ──
         if (effectsBtn) {
             updateEffectsIcon(isEffectsMuted());
 
@@ -77,7 +68,6 @@ export class AppController {
                 updateEffectsIcon(nowMuted);
             });
         }
-        // 4) Wire up the new “persistent” navbar buttons
         const navHome   = document.getElementById('nav-home');
         const navScores = document.getElementById('nav-scores');
         const navManage = document.getElementById('nav-manage');
@@ -91,18 +81,16 @@ export class AppController {
             navManage.addEventListener('click', () => this.showControlPanel());
         }
 
-        // 5) Instantiate the “logic” QuizController (no UI here)
         this.quizLogic = new QuizController({
             onQuizLoaded: data    => this.quizUI.handleQuizLoaded(data),
             onQuestionRendered: st => this.quizUI.renderQuestion(st),
             onQuizFinished: resultsObj => this.handleResults(resultsObj)
         });
 
-        // 6) Setup history/navigation
         history.replaceState({ page: 'home' }, '', window.location.pathname);
         window.addEventListener('popstate', event => this._onPopState(event));
 
-        // 7) Show Home initially
+
         this.showSection(this.homeScreen);
     }
 
@@ -150,11 +138,13 @@ export class AppController {
         });
 
         history.replaceState({ page: 'results' }, '', window.location);
-        this.resultsCtrl.show(resultsObj, this.currentPlayer, this.currentQuizTitle);
+        this.resultsCtrl.show(resultsObj );
     }
 
     /** Show the high‐scores screen. */
     showScores() {
+        this.quizLogic.abortQuiz();
+        stopMusic();
         history.pushState({ page: 'scores' }, '', window.location);
         this.scoresCtrl.show();
     }
@@ -183,9 +173,12 @@ export class AppController {
 
     /** Navigate back to Home (rebuild list). */
     backToHome() {
-        history.replaceState({ page: 'home' }, '', window.location.pathname);
-        this.homeCtrl.buildQuizList();
-        this.showSection(this.homeScreen);
+               this.quizLogic.abortQuiz();
+               stopMusic();
+
+                    history.replaceState({ page: 'home' }, '', window.location.pathname);
+                this.homeCtrl.buildQuizList();
+                this.showSection(this.homeScreen);
     }
 
     /** Handle browser back/forward. */

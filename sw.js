@@ -1,8 +1,6 @@
-// sw.js
 
 const CACHE_NAME = 'geo-quiz-v1';
 
-// List all “app shell” assets to pre-cache
 const ASSETS_TO_CACHE = [
     '/',                     // index.html
     '/index.html',
@@ -27,7 +25,7 @@ const ASSETS_TO_CACHE = [
     '/js/controllers/scoresController.js',
     '/js/controllers/controlPanelController.js',
     '/js/controllers/authoringController.js',
-    '/js/controllers/authoringHelpers.js',  // ← new!
+    '/js/controllers/authoringHelpers.js',
 
     // Media
     '/media/background-music.mp3',
@@ -44,7 +42,6 @@ const ASSETS_TO_CACHE = [
 ];
 
 self.addEventListener('install', event => {
-    // Pre-cache everything in ASSETS_TO_CACHE
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => cache.addAll(ASSETS_TO_CACHE))
@@ -53,7 +50,6 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-    // Cleanup any old caches if version changes
     event.waitUntil(
         caches.keys().then(keys =>
             Promise.all(
@@ -68,7 +64,6 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
     const requestURL = new URL(event.request.url);
 
-    // Always serve from cache first, then fallback to network, then fallback to cache if network fails.
     event.respondWith(
         caches.match(event.request).then(cachedResponse => {
             if (cachedResponse) {
@@ -89,8 +84,9 @@ self.addEventListener('fetch', event => {
                     return networkResponse;
                 })
                 .catch(() => {
-                    // If both cache and network fail, you could optionally return a fallback.
-                    // For simplicity, let it fail (e.g. offline JSON if not in cache).
+
+                    console.log("cache error")
+
                 });
         })
     );

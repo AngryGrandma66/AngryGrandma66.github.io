@@ -5,172 +5,193 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Geografie Kvízy</title>
     <link rel="stylesheet" href="css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-<!-- We can leave <header> empty or remove it altogether;
-     the navbar itself now holds the title and controls. -->
 <header></header>
 
 <!-- ===================== Navbar ===================== -->
 <nav id="main-nav">
-    <div class="nav-left">
-        <!-- Moved title into navbar -->
-        <span class="nav-title">Geografie Kvízy</span>
+    <div class="nav-container">
+        <div class="nav-left">
+            <span class="nav-title">
+                <span class="title-icon">🌍</span>
+                Geografie Kvízy
+            </span>
 
-        <!-- Moved “name / initials” input into navbar -->
-        <input id="player-name" type="text" maxlength="10" placeholder="Jméno / Iniciály" />
+            <div class="player-input-group">
+                <input id="player-name" type="text" maxlength="10" placeholder="Jméno / Iniciály" />
+            </div>
 
-        <!-- Moved mute/unmute buttons into navbar -->
-        <!-- …inside <nav class="nav-left">… -->
-        <button id="toggle-music-btn" aria-label="Mute music">
-            <svg
-                    id="music-icon"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-            >
-                <!-- ── Musical note (always shown when unmuted) ── -->
-                <path
-                        id="music-note"
-                        d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"
-                        fill="currentColor"
-                />
-                <!-- ── Diagonal slash (visible only when muted) ── -->
-                <line
-                        id="music-slash"
-                        x1="4"
-                        y1="4"
-                        x2="20"
-                        y2="20"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        visibility="hidden"
-                />
-            </svg>
-        </button>
+            <div class="audio-controls">
+                <button id="toggle-music-btn" class="audio-btn" aria-label="Mute music">
+                    <svg id="music-icon" width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path id="music-note" d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z" fill="currentColor" />
+                        <line id="music-slash" x1="4" y1="4" x2="20" y2="20" stroke="currentColor" stroke-width="2" visibility="hidden" />
+                    </svg>
+                </button>
 
-        <button id="toggle-effects-btn" aria-label="Mute effects">
-            <svg
-                    id="effects-icon"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-            >
-                <!-- We reuse the same “speaker” shape for effects. -->
-                <path
-                        id="effects-speaker"
-                        d="M3 9v6h4l5 5V4L7 9H3z"
-                        fill="currentColor"
-                />
-                <path
-                        id="effects-waves"
-                        d="M14.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.74 2.5-2.26 2.5-4.02z"
-                        fill="currentColor"
-                />
-                <line
-                        id="effects-slash"
-                        x1="4"
-                        y1="4"
-                        x2="20"
-                        y2="20"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        visibility="hidden"
-                />
-            </svg>
-        </button>
+                <button id="toggle-effects-btn" class="audio-btn" aria-label="Mute effects">
+                    <svg id="effects-icon" width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path id="effects-speaker" d="M3 9v6h4l5 5V4L7 9H3z" fill="currentColor" />
+                        <path id="effects-waves" d="M14.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.74 2.5-2.26 2.5-4.02z" fill="currentColor" />
+                        <line id="effects-slash" x1="4" y1="4" x2="20" y2="20" stroke="currentColor" stroke-width="2" visibility="hidden" />
+                    </svg>
+                </button>
+            </div>
+        </div>
 
-    </div>
-
-    <div class="nav-right">
-        <!-- Persistent nav buttons -->
-        <button id="nav-home">Domů</button>
-        <button id="nav-scores">Žebříček</button>
-        <button id="nav-manage">Spravovat kvízy</button>
+        <div class="nav-right">
+            <button id="nav-home" class="nav-btn">
+                <span>🏠</span>
+                Domů
+            </button>
+            <button id="nav-scores" class="nav-btn">
+                <span>🏆</span>
+                Žebříček
+            </button>
+            <button id="nav-manage" class="nav-btn">
+                <span>⚙️</span>
+                Spravovat
+            </button>
+        </div>
     </div>
 </nav>
 
 <main>
     <!-- =================== Home / Quiz selection =================== -->
     <section id="home-screen" class="active">
-        <div id="home-controls">
-            <!-- We removed “View Scores” and “Spravovat kvízy” from here,
-                 since they now live in the navbar -->
-            <button id="create-quiz-btn">Vytvořit kvíz</button>
-            <button id="import-quiz-btn">Importovat kvíz</button>
-            <input type="file" id="import-file-input" accept=".json" />
+        <div class="home-header">
+            <h1>Vyberte kvíz</h1>
+            <p>Otestujte své znalosti zeměpisu</p>
         </div>
 
-        <!-- DYNAMIC quiz list: built-in + custom (Play only) -->
+        <div id="home-controls" class="home-controls">
+            <button id="create-quiz-btn" class="control-btn create-btn">
+                <span>➕</span>
+                Vytvořit kvíz
+            </button>
+            <button id="import-quiz-btn" class="control-btn import-btn">
+                <span>📁</span>
+                Importovat kvíz
+            </button>
+            <input type="file" id="import-file-input" accept=".json" />
+        </div>
 
         <nav class="quiz-list"></nav>
     </section>
 
     <!-- =================== Quiz screen =================== -->
     <section id="quiz-screen">
-        <header><h2 id="quiz-title"></h2></header>
-        <div id="progress-container">
-            <span id="progress-text">Otázka 0/0</span>
-            <progress id="progress-bar" value="0" max="0"></progress>
-            <span id="timer">0s</span>
+        <div class="quiz-header">
+            <h2 id="quiz-title"></h2>
+            <div id="progress-container">
+                <div class="progress-info">
+                    <span id="progress-text">Otázka 0/0</span>
+                    <span id="timer" class="timer">0s</span>
+                </div>
+                <div class="progress-bar-container">
+                    <progress id="progress-bar" value="0" max="0"></progress>
+                </div>
+            </div>
         </div>
-        <article id="question-card">
-            <div id="media-container"></div>
-            <p id="question-text"></p>
-            <ul id="choices-list"></ul>
+
+        <article id="question-card" class="question-card">
+            <div id="media-container" class="media-container"></div>
+            <div class="question-content">
+                <p id="question-text"></p>
+                <ul id="choices-list"></ul>
+            </div>
         </article>
-        <footer>
-            <button id="next-btn" disabled>Další</button>
+
+        <footer class="quiz-footer">
+            <button id="next-btn" class="next-btn" disabled>Další</button>
         </footer>
     </section>
 
     <!-- =================== Results screen =================== -->
     <section id="results-screen">
-        <header><h2>Výsledky</h2></header>
-        <p id="score-text"></p>
-        <canvas id="resultsChart" width="300" height="300"></canvas>
-        <footer>
-            <button id="home-btn">Zpět na domovskou</button>
-        </footer>
+        <div class="results-container">
+            <div class="results-header">
+                <h2>🎉 Výsledky</h2>
+                <p id="score-text" class="score-text"></p>
+            </div>
+            <div class="chart-container">
+                <canvas id="resultsChart" width="400" height="300"></canvas>
+            </div>
+            <footer class="results-footer">
+                <button id="home-btn" class="home-btn">Zpět na domovskou</button>
+            </footer>
+        </div>
     </section>
 
     <!-- =================== High‐Score screen =================== -->
     <section id="scores-screen">
-        <header><h2>Žebříček</h2></header>
-        <ul id="high-score-list"></ul>
-        <footer>
-            <button id="scores-home-btn">Zpět na domovskou</button>
-        </footer>
+        <div class="scores-container">
+            <div class="scores-header">
+                <h2>🏆 Žebříček</h2>
+            </div>
+            <div class="scores-content">
+                <ul id="high-score-list"></ul>
+            </div>
+            <footer class="scores-footer">
+                <button id="scores-home-btn" class="home-btn">Zpět na domovskou</button>
+            </footer>
+        </div>
     </section>
 
     <!-- =================== Control Panel screen =================== -->
     <section id="control-panel-screen">
-        <header><h2>Správa vlastních kvízů</h2></header>
-        <ul id="control-panel-list"></ul>
-        <footer>
-            <button id="control-home-btn">Zpět na domovskou</button>
-        </footer>
+        <div class="control-container">
+            <div class="control-header">
+                <h2>⚙️ Správa vlastních kvízů</h2>
+            </div>
+            <div class="control-content">
+                <ul id="control-panel-list"></ul>
+            </div>
+            <footer class="control-footer">
+                <button id="control-home-btn" class="home-btn">Zpět na domovskou</button>
+            </footer>
+        </div>
     </section>
 
     <!-- =================== Authoring screen =================== -->
     <section id="authoring-screen">
-        <header><h2>Vytvořit / Upravit kvíz</h2></header>
-        <form id="authoring-form">
-            <label for="new-quiz-name">Název kvízu:</label>
-            <input id="new-quiz-name" type="text" required maxlength="30" />
+        <div class="authoring-container">
+            <div class="authoring-header">
+                <h2>✏️ Vytvořit / Upravit kvíz</h2>
+            </div>
+            <form id="authoring-form" class="authoring-form">
+                <div class="form-group">
+                    <label for="new-quiz-name">Název kvízu:</label>
+                    <input id="new-quiz-name" type="text" required maxlength="30" />
+                </div>
 
-            <div id="questions-container"></div>
+                <div id="questions-container" class="questions-container"></div>
 
-            <button type="button" id="add-question-btn">Přidat otázku</button>
-            <br />
-            <button type="button" id="save-quiz-btn">Uložit kvíz</button>
-            <button type="button" id="export-quiz-btn">Exportovat kvíz</button>
-        </form>
-        <footer>
-            <button id="authoring-home-btn">Zpět na domovskou</button>
-        </footer>
+                <div class="form-actions">
+                    <button type="button" id="add-question-btn" class="action-btn add-btn">
+                        <span>➕</span>
+                        Přidat otázku
+                    </button>
+                    <div class="save-actions">
+                        <button type="button" id="save-quiz-btn" class="action-btn save-btn">
+                            <span>💾</span>
+                            Uložit kvíz
+                        </button>
+                        <button type="button" id="export-quiz-btn" class="action-btn export-btn">
+                            <span>📤</span>
+                            Exportovat kvíz
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <footer class="authoring-footer">
+                <button id="authoring-home-btn" class="home-btn">Zpět na domovskou</button>
+            </footer>
+        </div>
     </section>
 
     <!-- =================== Audio elements =================== -->
