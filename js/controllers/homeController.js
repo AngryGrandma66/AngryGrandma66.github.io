@@ -6,23 +6,53 @@ export class HomeController {
         this.app = app;
 
         // Grab Home screen elements
-        this.quizListNav      = document.querySelector('nav.quiz-list');
-        this.playerNameInput  = document.getElementById('player-name');
-        this.viewScoresBtn    = document.getElementById('view-scores-btn');
-        this.manageQuizzesBtn = document.getElementById('manage-quizzes-btn');
-        this.createQuizBtn    = document.getElementById('create-quiz-btn');
-        this.importQuizBtn    = document.getElementById('import-quiz-btn');
-        this.importFileInput  = document.getElementById('import-file-input');
+        this.quizListNav     = document.querySelector('nav.quiz-list');
+        this.playerNameInput = document.getElementById('player-name');
+        this.createQuizBtn   = document.getElementById('create-quiz-btn');
+        this.importQuizBtn   = document.getElementById('import-quiz-btn');
+        this.importFileInput = document.getElementById('import-file-input');
 
-        // Wire up buttons
-        this.viewScoresBtn.addEventListener('click', () => this.app.showScores());
-        this.manageQuizzesBtn.addEventListener('click', () => this.app.showControlPanel());
+        // Track if we've already “activated” the inline warning logic
+        this._hasTriedStart = false;
+
+        // 1) Create & insert a <div> for the inline warning, above the quiz buttons:
+        this.nameErrorDiv = document.createElement('div');
+        this.nameErrorDiv.style.color = 'red';
+        this.nameErrorDiv.style.marginBottom = '0.5rem';
+        this.nameErrorDiv.textContent = '';
+        this.quizListNav.parentNode.insertBefore(this.nameErrorDiv, this.quizListNav);
+
+        // 2) Listen for changes in the name input:
+        //    Once user types, enable/disable all quiz buttons and clear/re‐show warning.
+        this.playerNameInput.addEventListener('input', () => {
+            // Enable/disable every quiz button based on whether name is non‐empty:
+            const hasName = Boolean(this.getPlayerName());
+            this.quizListNav.querySelectorAll('button').forEach(btn => {
+                btn.disabled = !hasName;
+            });
+            // If we've already tried to start at least once, keep warning in sync:
+            if (this._hasTriedStart) {
+                this.nameErrorDiv.textContent = hasName
+                    ? ''
+                    : 'Prosím, zadejte své jméno nebo iniciály.';
+            }
+        });
+
+        // Wire up “Create Quiz” & “Import Quiz” (unchanged)
         this.createQuizBtn.addEventListener('click', () => this.app.showAuthoringBlank());
         this.importQuizBtn.addEventListener('click', () => this.importFileInput.click());
-        // Actual import‐file handling lives in AuthoringController
 
-        // Build initial list
+        // Build the list of quiz‐buttons for the first time:
         this.buildQuizList();
+
+        // 3) Immediately check “name” on load and show warning if empty:
+        //    This forces the inline warning to appear right away,
+        //    and disables all quiz buttons.
+        if (!this.getPlayerName()) {
+            this._hasTriedStart = true;
+            this.nameErrorDiv.textContent = 'Prosím, zadejte své jméno nebo iniciály.';
+            this.quizListNav.querySelectorAll('button').forEach(btn => btn.disabled = true);
+        }
     }
 
     /** Return the entered player name/initials. */
@@ -32,9 +62,13 @@ export class HomeController {
 
     /** Rebuild the “Play”‐only quiz list (built-in + custom). */
     buildQuizList() {
+        // Clear any old buttons—and reset the “tried” flag so we don't
+        // mistakenly hide the warning on rebuild:
         this.quizListNav.innerHTML = '';
+        this._hasTriedStart = false;
+        this.nameErrorDiv.textContent = '';
 
-        // 1) Built-in quizzes
+        // 1) Built‐in quizzes
         const BUILTIN_QUIZZES = [
             { id: 'afrika',               label: 'Afrika' },
             { id: 'evropa',               label: 'Evropa' },
@@ -44,11 +78,23 @@ export class HomeController {
             { id: 'stredni-amerika',      label: 'Střední Amerika' },
             { id: 'kanada-usa',           label: 'Kanada a USA' }
         ];
+        const hasNameOnBuild = Boolean(this.getPlayerName());
+
         BUILTIN_QUIZZES.forEach(({ id, label }) => {
             const btn = document.createElement('button');
-            btn.textContent = label;
+            btn.textContent   = label;
             btn.dataset.topic = id;
+            btn.disabled      = !hasNameOnBuild;
             btn.addEventListener('click', () => {
+                const name = this.getPlayerName();
+                if (!name) {
+                    // First time (or after rebuild) with no name → show warning
+                    this._hasTriedStart = true;
+                    this.nameErrorDiv.textContent = 'Prosím, zadejte své jméno nebo iniciály.';
+                    return;
+                }
+                // Name is filled → clear warning & start quiz
+                this.nameErrorDiv.textContent = '';
                 this.app.startQuiz(id, label);
             });
             this.quizListNav.appendChild(btn);
@@ -64,9 +110,17 @@ export class HomeController {
 
             custom.forEach(({ id, name }) => {
                 const btn = document.createElement('button');
-                btn.textContent = `${name} (vlastní)`;
+                btn.textContent   = `${name} (vlastní)`;
                 btn.dataset.topic = id;
+                btn.disabled      = !hasNameOnBuild;
                 btn.addEventListener('click', () => {
+                    const player = this.getPlayerName();
+                    if (!player) {
+                        this._hasTriedStart = true;
+                        this.nameErrorDiv.textContent = 'Prosím, zadejte své jméno nebo iniciály.';
+                        return;
+                    }
+                    this.nameErrorDiv.textContent = '';
                     this.app.startQuiz(id, name);
                 });
                 this.quizListNav.appendChild(btn);
