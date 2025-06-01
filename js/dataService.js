@@ -1,5 +1,5 @@
 // js/dataService.js
-import { shuffleArray, isOnline } from './utils.js';
+import {shuffleArray} from './utils.js';
 
 const BUILTIN_FETCH_ERROR = new Error('Quiz data not found');
 const OFFLINE_NO_CACHE_ERROR = new Error('Offline: no cached quiz data');
@@ -69,48 +69,31 @@ export function deleteCustomQuiz(id) {
  * Loads quiz data for either a built‐in or a custom quiz.
  */
 export function loadQuizData(topic) {
-    // 1) Check custom quizzes first
+    // 1) Check custom quizzes first (still use localStorage for user-created)
     const customMap = _getCustomMap();
     if (customMap[topic]) {
         return Promise.resolve(_transform(customMap[topic]));
     }
 
-    // 2) Otherwise, fall back to built‐in fetch + caching
-    const cacheKey = `quiz_${topic}`;
-    const getCachedRaw = () => {
-        const rawJson = localStorage.getItem(cacheKey);
-        return rawJson ? JSON.parse(rawJson) : null;
-    };
-
-    if (!isOnline()) {
-        const raw = getCachedRaw();
-        if (raw) {
-            return Promise.resolve(_transform(raw));
-        }
-        return Promise.reject(OFFLINE_NO_CACHE_ERROR);
-    }
-
+    // 2) Otherwise, fetch the built-in JSON directly. Service Worker will have it cached.
     return fetch(`data/${topic}.json`)
         .then(res => {
             if (!res.ok) throw BUILTIN_FETCH_ERROR;
             return res.json();
         })
-        .then(rawData => {
-            localStorage.setItem(cacheKey, JSON.stringify(rawData));
-            return _transform(rawData);
-        });
+        .then(rawData => _transform(rawData));
 }
 
 /**
  * Transforms raw quiz format into { title, questions: [ { text, choices, answer } ] }.
  */
 function _transform(raw) {
-    const data = { title: raw.name, questions: [] };
+    const data = {title: raw.name, questions: []};
     raw.questions.forEach(q => {
         if (q.choices) {
             data.questions.push(q);
         } else {
-            const allChoices = [ ...q.other_answers, q.right_answer ];
+            const allChoices = [...q.other_answers, q.right_answer];
             shuffleArray(allChoices);
             data.questions.push({
                 text: q.text,

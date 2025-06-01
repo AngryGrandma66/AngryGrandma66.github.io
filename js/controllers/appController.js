@@ -6,9 +6,14 @@ import {ScoresController} from './scoresController.js';
 import {ControlPanelController} from './controlPanelController.js';
 import {AuthoringController} from './authoringController.js';
 import {QuizController} from '../quizController.js';
-import {stopMusic} from '../audioController.js';
 import {addScore} from '../scoreService.js';
-
+import {
+    stopMusic,
+    toggleMusicMute,
+    toggleEffectsMute,
+    isMusicMuted,
+    isEffectsMuted
+} from '../audioController.js';
 export class AppController {
     constructor() {
         // 1) Grab all <section> elements
@@ -27,6 +32,33 @@ export class AppController {
         this.controlPanelCtrl = new ControlPanelController(this);
         this.authoringCtrl = new AuthoringController({onAuthorSaved: () => this.homeCtrl.buildQuizList()});
 
+
+        const musicBtn   = document.getElementById('toggle-music-btn');
+        const effectsBtn = document.getElementById('toggle-effects-btn');
+
+        if (musicBtn) {
+            // Initialize label based on current state
+            musicBtn.textContent = isMusicMuted() ? 'Unmute Music' : 'Mute Music';
+
+            musicBtn.addEventListener('click', () => {
+                const nowMuted = toggleMusicMute();
+                musicBtn.textContent = nowMuted ? 'Unmute Music' : 'Mute Music';
+            });
+        }
+
+        if (effectsBtn) {
+            effectsBtn.textContent = isEffectsMuted() ? 'Unmute Effects' : 'Mute Effects';
+
+            effectsBtn.addEventListener('click', () => {
+                const nowMuted = toggleEffectsMute();
+                effectsBtn.textContent = nowMuted ? 'Unmute Effects' : 'Mute Effects';
+            });
+        }
+        document
+            .getElementById('authoring-home-btn')
+            .addEventListener('click', () => {
+                this.backToHome();
+            });
         // 3) Instantiate the “logic” quizController separately (no UI here)
         this.quizLogic = new QuizController({
             onQuizLoaded: data => this.quizUI.handleQuizLoaded(data),

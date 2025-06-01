@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Geografie Kvízy</title>
     <style>
@@ -14,25 +14,31 @@
             flex-direction: column;
             min-height: 100vh;
         }
+
         header {
             background: #2c3e50;
             color: white;
             padding: 1rem;
             text-align: center;
         }
+
         main {
             flex: 1;
             padding: 1rem;
         }
+
         section {
             display: none;
         }
+
         section.active {
             display: block;
         }
+
         #quiz-screen article {
             margin-bottom: 1rem;
         }
+
         #choices-list {
             list-style: none;
             padding: 0;
@@ -40,6 +46,7 @@
             grid-template-columns: 1fr 1fr;
             gap: 0.5rem;
         }
+
         #choices-list button {
             width: 100%;
             padding: 0.5rem;
@@ -49,26 +56,32 @@
             border-radius: 0.25rem;
             transition: background 0.3s;
         }
+
         #choices-list button:hover {
             background: #ecf0f1;
         }
+
         button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
         }
+
         #progress-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
         }
+
         #progress-text {
             font-weight: bold;
         }
+
         #progress-bar {
             width: 50%;
             height: 1rem;
         }
+
         #timer {
             font-size: 1rem;
             background: #e74c3c;
@@ -76,23 +89,28 @@
             padding: 0.25rem 0.5rem;
             border-radius: 0.25rem;
         }
+
         footer {
             text-align: center;
             margin-top: 1rem;
         }
+
         canvas {
             display: block;
             margin: 1rem auto;
             border: 1px solid #ccc;
         }
+
         @media (max-width: 600px) {
             #choices-list {
                 grid-template-columns: 1fr;
             }
+
             #progress-container {
                 flex-direction: column;
                 gap: 0.5rem;
             }
+
             #progress-bar {
                 width: 100%;
             }
@@ -106,6 +124,7 @@
             justify-content: center;
             margin-top: 1rem;
         }
+
         nav.quiz-list button {
             padding: 0.75rem 1.5rem;
             font-size: 1rem;
@@ -119,13 +138,16 @@
             max-width: 200px;
             text-align: center;
         }
+
         nav.quiz-list button:hover {
             transform: scale(1.05);
         }
+
         #home-controls {
             text-align: center;
             margin-bottom: 1rem;
         }
+
         #create-quiz-btn,
         #import-quiz-btn,
         #manage-quizzes-btn,
@@ -139,6 +161,7 @@
             background: #f39c12;
             color: white;
         }
+
         #create-quiz-btn:hover,
         #import-quiz-btn:hover,
         #manage-quizzes-btn:hover,
@@ -150,12 +173,14 @@
         #control-panel-screen h2 {
             text-align: center;
         }
+
         #control-panel-list {
             list-style: none;
             padding: 0;
             max-width: 600px;
             margin: 0 auto;
         }
+
         #control-panel-list li {
             display: flex;
             align-items: center;
@@ -163,13 +188,16 @@
             border-bottom: 1px solid #ccc;
             padding: 0.5rem 0;
         }
+
         #control-panel-list li:last-child {
             border-bottom: none;
         }
+
         .control-quiz-name {
             flex-grow: 1;
             font-weight: bold;
         }
+
         .control-btn {
             margin-left: 0.5rem;
             padding: 0.25rem 0.5rem;
@@ -180,12 +208,15 @@
             background: #3498db;
             color: white;
         }
+
         .control-btn:hover {
             filter: brightness(0.9);
         }
+
         .delete-btn {
             background: #c0392b;
         }
+
         .delete-btn:hover {
             filter: brightness(0.9);
         }
@@ -195,14 +226,17 @@
             max-width: 600px;
             margin: 0 auto;
         }
+
         #authoring-screen h2 {
             text-align: center;
         }
+
         #authoring-form label {
             display: block;
             margin: 0.5rem 0 0.25rem;
             font-weight: bold;
         }
+
         #authoring-form input[type="text"],
         #authoring-form textarea {
             width: 100%;
@@ -210,6 +244,7 @@
             font-size: 1rem;
             margin-bottom: 0.5rem;
         }
+
         #add-question-btn,
         #save-quiz-btn,
         #export-quiz-btn {
@@ -222,20 +257,24 @@
             background: #27ae60;
             color: white;
         }
+
         #add-question-btn:hover,
         #save-quiz-btn:hover,
         #export-quiz-btn:hover {
             filter: brightness(0.9);
         }
+
         .question-block {
             border: 1px solid #ccc;
             border-radius: 0.25rem;
             padding: 0.75rem;
             margin-bottom: 1rem;
         }
+
         .question-block h4 {
             margin: 0 0 0.5rem;
         }
+
         .question-block .remove-question-btn {
             background: #c0392b;
             color: white;
@@ -246,16 +285,24 @@
             cursor: pointer;
             float: right;
         }
+
         .question-block .remove-question-btn:hover {
             filter: brightness(0.9);
         }
+
         #import-file-input {
             display: none;
         }
     </style>
 </head>
 <body>
-<header><h1>Geografie Kvízy</h1></header>
+<header>
+    <h1>Geografie Kvízy</h1>
+    <div id="sound-controls" style="margin-top: 0.5rem;">
+        <button id="toggle-music-btn">Mute Music</button>
+        <button id="toggle-effects-btn">Mute Effects</button>
+    </div>
+</header>
 <main>
     <!-- =================== Home / Quiz selection =================== -->
     <section id="home-screen" class="active">
