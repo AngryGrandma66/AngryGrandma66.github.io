@@ -7,7 +7,10 @@ const ASSETS_TO_CACHE = [
     '/',                     // index.html
     '/index.html',
 
-    // JS modules
+    // CSS
+    '/css/styles.css',
+
+    // JS modules (app‐level)
     '/js/app.js',
     '/js/audioController.js',
     '/js/chartController.js',
@@ -24,6 +27,7 @@ const ASSETS_TO_CACHE = [
     '/js/controllers/scoresController.js',
     '/js/controllers/controlPanelController.js',
     '/js/controllers/authoringController.js',
+    '/js/controllers/authoringHelpers.js',  // ← new!
 
     // Media
     '/media/background-music.mp3',

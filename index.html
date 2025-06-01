@@ -21,8 +21,67 @@
         <input id="player-name" type="text" maxlength="10" placeholder="Jméno / Iniciály" />
 
         <!-- Moved mute/unmute buttons into navbar -->
-        <button id="toggle-music-btn">Mute Music</button>
-        <button id="toggle-effects-btn">Mute Effects</button>
+        <!-- …inside <nav class="nav-left">… -->
+        <button id="toggle-music-btn" aria-label="Mute music">
+            <svg
+                    id="music-icon"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+            >
+                <!-- ── Musical note (always shown when unmuted) ── -->
+                <path
+                        id="music-note"
+                        d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"
+                        fill="currentColor"
+                />
+                <!-- ── Diagonal slash (visible only when muted) ── -->
+                <line
+                        id="music-slash"
+                        x1="4"
+                        y1="4"
+                        x2="20"
+                        y2="20"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        visibility="hidden"
+                />
+            </svg>
+        </button>
+
+        <button id="toggle-effects-btn" aria-label="Mute effects">
+            <svg
+                    id="effects-icon"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+            >
+                <!-- We reuse the same “speaker” shape for effects. -->
+                <path
+                        id="effects-speaker"
+                        d="M3 9v6h4l5 5V4L7 9H3z"
+                        fill="currentColor"
+                />
+                <path
+                        id="effects-waves"
+                        d="M14.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.74 2.5-2.26 2.5-4.02z"
+                        fill="currentColor"
+                />
+                <line
+                        id="effects-slash"
+                        x1="4"
+                        y1="4"
+                        x2="20"
+                        y2="20"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        visibility="hidden"
+                />
+            </svg>
+        </button>
+
     </div>
 
     <div class="nav-right">
@@ -45,6 +104,7 @@
         </div>
 
         <!-- DYNAMIC quiz list: built-in + custom (Play only) -->
+
         <nav class="quiz-list"></nav>
     </section>
 

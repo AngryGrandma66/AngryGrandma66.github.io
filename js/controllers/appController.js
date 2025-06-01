@@ -38,21 +38,45 @@ export class AppController {
         // 3) Wire up “Sound/Theme Controls”
         const musicBtn   = document.getElementById('toggle-music-btn');
         const effectsBtn = document.getElementById('toggle-effects-btn');
+
+        function updateMusicIcon(isMuted) {
+            // When muted: hide the note path? (we actually keep it visible, but cross it out)
+            // Hide the note‐slash when unmuted; show it when muted.
+            document
+                .getElementById('music-slash')
+                .setAttribute('visibility', isMuted ? 'visible' : 'hidden');
+        }
+
+        function updateEffectsIcon(isMuted) {
+            document
+                .getElementById('effects-waves')
+                .setAttribute('visibility', isMuted ? 'hidden' : 'visible');
+            document
+                .getElementById('effects-slash')
+                .setAttribute('visibility', isMuted ? 'visible' : 'hidden');
+        }
+
+// ── Music button wiring ──
         if (musicBtn) {
-            musicBtn.textContent = isMusicMuted() ? 'Unmute Music' : 'Mute Music';
+            // 1) On load, show/hide slash according to existing mute state
+            updateMusicIcon(isMusicMuted());
+
+            // 2) On click, toggle and re-draw slash
             musicBtn.addEventListener('click', () => {
                 const nowMuted = toggleMusicMute();
-                musicBtn.textContent = nowMuted ? 'Unmute Music' : 'Mute Music';
-            });
-        }
-        if (effectsBtn) {
-            effectsBtn.textContent = isEffectsMuted() ? 'Unmute Effects' : 'Mute Effects';
-            effectsBtn.addEventListener('click', () => {
-                const nowMuted = toggleEffectsMute();
-                effectsBtn.textContent = nowMuted ? 'Unmute Effects' : 'Mute Effects';
+                updateMusicIcon(nowMuted);
             });
         }
 
+// ── Effects button wiring (unchanged) ──
+        if (effectsBtn) {
+            updateEffectsIcon(isEffectsMuted());
+
+            effectsBtn.addEventListener('click', () => {
+                const nowMuted = toggleEffectsMute();
+                updateEffectsIcon(nowMuted);
+            });
+        }
         // 4) Wire up the new “persistent” navbar buttons
         const navHome   = document.getElementById('nav-home');
         const navScores = document.getElementById('nav-scores');
