@@ -1,5 +1,4 @@
-// js/authoringController.js
-import { saveCustomQuiz, getAllCustomQuizzes, getCustomQuiz } from './dataService.js';
+import { saveCustomQuiz, getAllCustomQuizzes, getCustomQuiz } from '../dataService.js';
 
 export class AuthoringController {
     constructor({

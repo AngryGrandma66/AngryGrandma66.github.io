@@ -1,4 +1,4 @@
-// js/quizController.js
+// js/quizControllerUI.js
 import { loadQuizData } from './dataService.js';
 import { playMusic, stopMusic, playFinishSound } from './audioController.js';
 
