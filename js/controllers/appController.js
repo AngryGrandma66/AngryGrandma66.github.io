@@ -145,8 +145,8 @@ export class AppController {
     /** Called when “Create Quiz” is clicked. */
     showAuthoringBlank() {
         history.pushState({page: 'authoring'}, '', window.location);
-        this.authoringCtrl.loadQuizForEdit(null, null);
         this.showSection(this.authoringScreen);
+        this.authoringCtrl.loadQuizForEdit(null, null);
     }
 
     /** Called when editing an existing quiz. */
