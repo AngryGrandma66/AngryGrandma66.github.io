@@ -29,6 +29,7 @@ export function playMusic() {
 export function stopMusic() {
     if (!bgMusicElem) return;
     bgMusicElem.pause();
+    stopQuestionMedia()
 }
 
 /**
@@ -72,4 +73,20 @@ export function toggleEffectsMute() {
     if (!finishSoundElem) return false;
     finishSoundElem.muted = !finishSoundElem.muted;
     return finishSoundElem.muted;
+}
+/**
+ * Pause and reset any <audio> or <video> that’s still playing in the question area.
+ */
+function stopQuestionMedia() {
+    const mediaContainer = document.getElementById('media-container');
+    if (!mediaContainer) return;
+
+    // Find all <audio> or <video> that might be playing…
+    mediaContainer.querySelectorAll('audio, video').forEach((el) => {
+        el.pause();
+        el.currentTime = 0;
+    });
+
+    // Optionally clear out the container’s HTML so we don’t keep old nodes around:
+    mediaContainer.innerHTML = '';
 }
