@@ -36,6 +36,9 @@ export class AppController {
         const musicBtn   = document.getElementById('toggle-music-btn');
         const effectsBtn = document.getElementById('toggle-effects-btn');
 
+        const mediaContainer = document.getElementById('media-container');
+        if (mediaContainer) mediaContainer.innerHTML = '';
+
         if (musicBtn) {
             // Initialize label based on current state
             musicBtn.textContent = isMusicMuted() ? 'Unmute Music' : 'Mute Music';

@@ -3,6 +3,9 @@ export class QuizControllerUI {
     constructor(app) {
         this.app = app;
 
+        // Track which question index was last rendered
+        this.lastIndex = -1;
+
         // Grab Quiz screen elements
         this.quizTitleEl    = document.getElementById('quiz-title');
         this.progressTextEl = document.getElementById('progress-text');
@@ -25,20 +28,64 @@ export class QuizControllerUI {
 
     /** Called by quizLogic when JSON is loaded. */
     handleQuizLoaded(data) {
-        this.quizTitleEl.textContent = `Kvíz: ${data.title}`;
-        this.progressBarEl.max = data.questions.length;
-        this.app.showSection(this.app.quizScreen);
+        this.lastIndex = -1;
+            // Also immediately clear any stray media element
+                const mediaContainer = document.getElementById('media-container');
+          if (mediaContainer) mediaContainer.innerHTML = '';
+
+                this.quizTitleEl.textContent = `Kvíz: ${data.title}`;
+            this.progressBarEl.max = data.questions.length;
+            this.app.showSection(this.app.quizScreen);
     }
 
-    /** Renders the question (or feedback) each step. */
+    /**
+     * Renders the question (or feedback).
+     * We clear/inject media only when the question index changes.
+     *
+     * `state` has { question, index, total, timeLeft, selected, isCorrect, chosenIndex, timedOut }.
+     */
     renderQuestion(state) {
         const { question, index, total, timeLeft, selected, isCorrect, chosenIndex, timedOut } = state;
+        const mediaContainer = document.getElementById('media-container');
+
+        // If this is a new question index, clear any previous media
+        if (index !== this.lastIndex) {
+            mediaContainer.innerHTML = '';
+
+            // If this question has media, inject it once
+            if (question.media) {
+                let mediaElem;
+                if (question.media.type === 'audio') {
+                    mediaElem = document.createElement('audio');
+                    mediaElem.controls = true;
+                } else if (question.media.type === 'video') {
+                    mediaElem = document.createElement('video');
+                    mediaElem.controls = true;
+                    mediaElem.style.maxWidth = '100%';
+                }
+
+                if (mediaElem) {
+                    mediaElem.src = question.media.url;
+
+                    // Once metadata loads, extend the timer by the media's duration
+                    mediaElem.addEventListener('loadedmetadata', () => {
+                        const extraSec = Math.ceil(mediaElem.duration);
+                        this.app.quizLogic.extendTimer(extraSec);
+                    });
+
+                    mediaContainer.appendChild(mediaElem);
+                }
+            }
+
+            // Remember that we've handled this index
+            this.lastIndex = index;
+        }
 
         // Update progress text + bar
         this.progressTextEl.textContent = `Otázka ${index + 1} / ${total}`;
         this.progressBarEl.value = index + 1;
 
-        // Show question
+        // Show question text
         this.questionTextEl.textContent = question.text;
         this.choicesListEl.innerHTML = '';
         this.nextBtn.disabled = true;
@@ -56,7 +103,7 @@ export class QuizControllerUI {
             this.choicesListEl.appendChild(li);
         });
 
-        // If already answered/timed out, disable & color them
+        // If already answered/timed out, disable & color the buttons
         if (selected || timedOut) {
             const allButtons = this.choicesListEl.querySelectorAll('button');
             allButtons.forEach(buttonEl => {

@@ -1,29 +1,25 @@
-import { saveCustomQuiz, getAllCustomQuizzes, getCustomQuiz } from '../dataService.js';
+// js/controllers/authoringController.js
+import {getAllCustomQuizzes, saveCustomQuiz} from '../dataService.js';
 
 export class AuthoringController {
-    constructor({
-                    onAuthorSaved // callback to notify UIController to rebuild the quiz list
-                }) {
+    constructor({onAuthorSaved}) {
         this.onAuthorSaved = onAuthorSaved;
 
         // Grab DOM elements
-        this.authoringScreen    = document.getElementById('authoring-screen');
-        this.newQuizNameInput   = document.getElementById('new-quiz-name');
+        this.authoringScreen = document.getElementById('authoring-screen');
+        this.newQuizNameInput = document.getElementById('new-quiz-name');
         this.questionsContainer = document.getElementById('questions-container');
-        this.addQuestionBtn     = document.getElementById('add-question-btn');
-        this.saveQuizBtn        = document.getElementById('save-quiz-btn');
-        this.exportQuizBtn      = document.getElementById('export-quiz-btn');
-        this.importFileInput    = document.getElementById('import-file-input');
-        this.importQuizBtn      = document.getElementById('import-quiz-btn');
-        this.createQuizBtn      = document.getElementById('create-quiz-btn');
-        this.authoringHomeBtn   = document.getElementById('authoring-home-btn');
+        this.addQuestionBtn = document.getElementById('add-question-btn');
+        this.saveQuizBtn = document.getElementById('save-quiz-btn');
+        this.exportQuizBtn = document.getElementById('export-quiz-btn');
+        this.importFileInput = document.getElementById('import-file-input');
+        this.importQuizBtn = document.getElementById('import-quiz-btn');
+        this.createQuizBtn = document.getElementById('create-quiz-btn');
+        this.authoringHomeBtn = document.getElementById('authoring-home-btn');
 
-        // Keep track of question‐block IDs
         this.nextQuestionId = 1;
-
-        // Currently‐loaded quiz (for editing/export)
         this.currentRawQuiz = null;
-        this.currentQuizId  = null;
+        this.currentQuizId = null;
 
         // Event listeners
         this.addQuestionBtn.addEventListener('click', () => this._addQuestionBlock());
@@ -38,7 +34,7 @@ export class AuthoringController {
     /** Show authoring UI and clear fields for a brand-new quiz. */
     _showAuthoringScreen() {
         this.currentRawQuiz = null;
-        this.currentQuizId  = null;
+        this.currentQuizId = null;
         this.newQuizNameInput.value = '';
         this.questionsContainer.innerHTML = '';
         this.nextQuestionId = 1;
@@ -53,63 +49,103 @@ export class AuthoringController {
 
     /**
      * Load an existing quiz (by ID + raw) into the authoring form for editing.
-     * prefillRaw must be: { name: string, questions: [ { text, right_answer, other_answers: [] } ] }.
+     * prefillRaw must be: { name: string, questions: [ { text, right_answer, other_answers: [], media? } ] }.
      */
     loadQuizForEdit(quizId, prefillRaw) {
-        this.currentQuizId  = quizId;
+        this.currentQuizId = quizId;
         this.currentRawQuiz = prefillRaw;
 
+        // 1) Set quiz name
         this.newQuizNameInput.value = prefillRaw.name;
+
+        // 2) Clear any existing question blocks
         this.questionsContainer.innerHTML = '';
         this.nextQuestionId = 1;
 
-        // For each question, add a block with prefill
+        // 3) For each question in raw, add a block with prefill, including media if any
         prefillRaw.questions.forEach(question => {
             this._addQuestionBlock(question);
         });
 
+        // 4) Show the form
         this.authoringScreen.classList.add('active');
     }
 
-    /** Add one question input block. If `prefill` is provided, fill fields accordingly. */
+    /**
+     * Add one question input block. If `prefill` is provided, fill fields accordingly.
+     * `prefill` can be { text, right_answer, other_answers: [], media? }.
+     */
     _addQuestionBlock(prefill = null) {
         const qid = this.nextQuestionId++;
         const wrapper = document.createElement('div');
         wrapper.classList.add('question-block');
         wrapper.dataset.qid = qid;
 
+        // If there’s existing media, stash it in data‐ attributes
+        if (prefill && prefill.media) {
+            wrapper.dataset.mediaUrl = prefill.media.url;
+            wrapper.dataset.mediaType = prefill.media.type;
+        }
+
+        // Build inner HTML (text/correct/other + preview + file input)
         wrapper.innerHTML = `
-      <h4>Otázka ${qid}
-        <button type="button" class="remove-question-btn" data-qid="${qid}">✖</button>
-      </h4>
-      <label for="question-text-${qid}">Text otázky:</label>
-      <textarea id="question-text-${qid}" rows="2" required></textarea>
+    <h4>Otázka ${qid}
+      <button type="button" class="remove-question-btn" data-qid="${qid}">✖</button>
+    </h4>
 
-      <label for="correct-answer-${qid}">Správná odpověď:</label>
-      <input id="correct-answer-${qid}" type="text" required />
+    <label for="question-text-${qid}">Text otázky:</label>
+    <textarea id="question-text-${qid}" rows="2" required></textarea>
 
-      <label for="other-answers-${qid}">Ostatní odpovědi (oddělené čárkami):</label>
-      <input id="other-answers-${qid}" type="text" placeholder="Např. odpověď A, odpověď B" required />
-    `;
+    <label for="correct-answer-${qid}">Správná odpověď:</label>
+    <input id="correct-answer-${qid}" type="text" required />
 
-        // If prefill is provided, set those fields
+    <label for="other-answers-${qid}">Ostatní odpovědi (oddělené čárkami):</label>
+    <input id="other-answers-${qid}" type="text" placeholder="Např. odpověď A, odpověď B" required />
+
+    <div id="media-preview-${qid}"></div>
+
+    <label for="media-file-${qid}">Přidat audio/video (MP3, MP4, atp.):</label>
+    <input id="media-file-${qid}" type="file" accept="audio/*,video/*" />
+  `;
+
+        // If prefill was provided, fill text/answers + show existing media preview
         if (prefill) {
-            wrapper.querySelector(`#question-text-${qid}`).value       = prefill.text;
-            wrapper.querySelector(`#correct-answer-${qid}`).value      = prefill.right_answer;
-            wrapper.querySelector(`#other-answers-${qid}`).value       = prefill.other_answers.join(', ');
+            wrapper.querySelector(`#question-text-${qid}`).value = prefill.text;
+            wrapper.querySelector(`#correct-answer-${qid}`).value = prefill.right_answer;
+            wrapper.querySelector(`#other-answers-${qid}`).value = prefill.other_answers.join(', ');
+
+            if (prefill.media && prefill.media.url) {
+                const previewContainer = wrapper.querySelector(`#media-preview-${qid}`);
+                previewContainer.innerHTML = ''; // clear any existing
+
+                if (prefill.media.type === 'audio') {
+                    const audio = document.createElement('audio');
+                    audio.src = prefill.media.url;
+                    audio.controls = true;
+                    previewContainer.appendChild(audio);
+                } else if (prefill.media.type === 'video') {
+                    const video = document.createElement('video');
+                    video.src = prefill.media.url;
+                    video.controls = true;
+                    video.style.maxWidth = '100%';
+                    previewContainer.appendChild(video);
+                }
+            }
         }
 
         // Wire up “remove” button
-        wrapper.querySelector('.remove-question-btn').addEventListener('click', () => {
-            this.questionsContainer.removeChild(wrapper);
-        });
+        wrapper.querySelector('.remove-question-btn')
+            .addEventListener('click', () => {
+                this.questionsContainer.removeChild(wrapper);
+            });
 
         this.questionsContainer.appendChild(wrapper);
     }
 
+
     /**
-     * Validate inputs, build a rawQuiz, and save it (overwriting if editing).
-     * rawQuiz = { name: string, questions: [ { text, right_answer, other_answers: [] } ] }
+     * Validate inputs, build a rawQuiz (including media Data URLs), and save it.
+     * rawQuiz = { name: string, questions: [ { text, right_answer, other_answers: [], media? } ] }
      */
     _saveQuiz() {
         const quizName = this.newQuizNameInput.value.trim();
@@ -120,10 +156,11 @@ export class AuthoringController {
 
         let quizId = this.currentQuizId;
         const isEditing = !!quizId;
-
-        // If not editing, generate a fresh ID
         if (!isEditing) {
-            let baseId = quizName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
+            let baseId = quizName
+                .toLowerCase()
+                .replace(/\s+/g, '-')
+                .replace(/[^a-z0-9\-]/g, '');
             quizId = baseId;
             const existing = getAllCustomQuizzes().map(q => q.id);
             let suffix = 1;
@@ -132,65 +169,107 @@ export class AuthoringController {
             }
         }
 
-        // Build questions array
         const blocks = Array.from(this.questionsContainer.querySelectorAll('.question-block'));
         if (blocks.length === 0) {
             alert('Přidejte prosím alespoň jednu otázku.');
             return;
         }
 
-        const questions = [];
-        for (const blk of blocks) {
+        // Build an array of Promises for each question’s media:
+        const mediaPromises = blocks.map(blk => {
             const qid = blk.dataset.qid;
-            const textEl   = blk.querySelector(`#question-text-${qid}`);
-            const correctEl= blk.querySelector(`#correct-answer-${qid}`);
-            const otherEl  = blk.querySelector(`#other-answers-${qid}`);
+            const fileInput = blk.querySelector(`#media-file-${qid}`);
+            const file = fileInput.files[0];
 
-            const textVal    = textEl.value.trim();
-            const correctVal = correctEl.value.trim();
-            const otherVal   = otherEl.value.trim();
-
-            if (!textVal || !correctVal || !otherVal) {
-                alert('Vyplňte prosím všechny pole u každé otázky.');
-                return;
+            if (file) {
+                // If a new file was chosen, read as Data URL
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        const dataURL = reader.result;
+                        const type = file.type.startsWith('video/') ? 'video' : 'audio';
+                        resolve({type, url: dataURL});
+                    };
+                    reader.onerror = () => {
+                        reject(reader.error);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            } else {
+                // No new file: fallback to existing data‐ attribute on wrapper
+                const existingUrl = blk.dataset.mediaUrl || null;
+                const existingType = blk.dataset.mediaType || null;
+                if (existingUrl && existingType) {
+                    return Promise.resolve({type: existingType, url: existingUrl});
+                }
+                return Promise.resolve(null);
             }
+        });
 
-            const otherArr = otherVal.split(',').map(s => s.trim()).filter(s => s);
-            if (otherArr.length < 1) {
-                alert('Musíte uvést alespoň jednu “ostatní odpověď” oddělenou čárkou.');
-                return;
-            }
+        // Wait for all media “promises” (some may be null) to resolve
+        Promise.all(mediaPromises)
+            .then(mediaArray => {
+                // Now build the questions array
+                const questions = [];
+                for (let i = 0; i < blocks.length; i++) {
+                    const blk = blocks[i];
+                    const qid = blk.dataset.qid;
+                    const textEl = blk.querySelector(`#question-text-${qid}`);
+                    const correctEl = blk.querySelector(`#correct-answer-${qid}`);
+                    const otherEl = blk.querySelector(`#other-answers-${qid}`);
 
-            if (otherArr.includes(correctVal)) {
-                alert('Správná odpověď se nesmí objevit mezi “ostatními odpověďmi.”');
-                return;
-            }
+                    const textVal = textEl.value.trim();
+                    const correctVal = correctEl.value.trim();
+                    const otherVal = otherEl.value.trim();
 
-            questions.push({
-                text: textVal,
-                right_answer: correctVal,
-                other_answers: otherArr
+                    if (!textVal || !correctVal || !otherVal) {
+                        alert('Vyplňte prosím všechny pole u každé otázky.');
+                        return;
+                    }
+
+                    const otherArr = otherVal
+                        .split(',')
+                        .map(s => s.trim())
+                        .filter(s => s);
+                    if (otherArr.length < 1) {
+                        alert('Musíte uvést alespoň jednu “ostatní odpověď” oddělenou čárkou.');
+                        return;
+                    }
+                    if (otherArr.includes(correctVal)) {
+                        alert('Správná odpověď se nesmí objevit mezi “ostatními odpověďmi.”');
+                        return;
+                    }
+
+                    // Build question object
+                    const questionObj = {
+                        text: textVal,
+                        right_answer: correctVal,
+                        other_answers: otherArr
+                    };
+                    const media = mediaArray[i];
+                    if (media) {
+                        questionObj.media = media;
+                    }
+                    questions.push(questionObj);
+                }
+
+                // Now construct rawQuiz & save
+                const rawQuiz = {name: quizName, questions};
+                saveCustomQuiz(quizId, rawQuiz);
+
+                this.currentRawQuiz = rawQuiz;
+                this.currentQuizId = quizId;
+                const verb = isEditing ? 'upraven' : 'uložen';
+                alert(`Kvíz “${quizName}” byl ${verb} (ID: ${quizId}).`);
+
+                // Notify the AppController so it can rebuild the home quiz list
+                if (typeof this.onAuthorSaved === 'function') {
+                    this.onAuthorSaved();
+                }
+            })
+            .catch(err => {
+                alert('Chyba při načítání médií: ' + err.message);
             });
-        }
-
-        const rawQuiz = {
-            name: quizName,
-            questions
-        };
-
-        // Save (overwrite if editing)
-        saveCustomQuiz(quizId, rawQuiz);
-
-        this.currentRawQuiz = rawQuiz;
-        this.currentQuizId  = quizId;
-
-        const verb = isEditing ? 'upraven' : 'uložen';
-        alert(`Kvíz “${quizName}” byl ${verb} (ID: ${quizId}).`);
-
-        // Notify UIController so it can rebuild the quiz list
-        if (typeof this.onAuthorSaved === 'function') {
-            this.onAuthorSaved();
-        }
     }
 
     /** Download the currently-loaded quiz as JSON. */
@@ -200,7 +279,7 @@ export class AuthoringController {
             return;
         }
         const filename = `${this.currentQuizId}.json`;
-        const blob = new Blob([ JSON.stringify(this.currentRawQuiz, null, 2) ], {
+        const blob = new Blob([JSON.stringify(this.currentRawQuiz, null, 2)], {
             type: 'application/json'
         });
         const url = URL.createObjectURL(blob);
@@ -243,8 +322,10 @@ export class AuthoringController {
                 return;
             }
 
-            // Create a new unique ID from filename
-            let baseId = file.name.replace(/\.json$/i, '').toLowerCase().replace(/\s+/g, '-')
+            let baseId = file.name
+                .replace(/\.json$/i, '')
+                .toLowerCase()
+                .replace(/\s+/g, '-')
                 .replace(/[^a-z0-9\-]/g, '');
             let quizId = baseId;
             const existing = getAllCustomQuizzes().map(q => q.id);
@@ -256,7 +337,6 @@ export class AuthoringController {
             saveCustomQuiz(quizId, raw);
             alert(`Kvíz “${raw.name}” byl importován (ID: ${quizId}).`);
 
-            // Trigger UIController refresh
             if (typeof this.onAuthorSaved === 'function') {
                 this.onAuthorSaved();
             }

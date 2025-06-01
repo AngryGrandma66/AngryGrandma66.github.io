@@ -91,15 +91,30 @@ function _transform(raw) {
     const data = {title: raw.name, questions: []};
     raw.questions.forEach(q => {
         if (q.choices) {
-            data.questions.push(q);
+            // Already‐transformed format from a saved quiz
+            const newQ = {
+                text: q.text,
+                choices: q.choices,
+                answer: q.answer
+            };
+            if (q.media) {
+                newQ.media = q.media;
+            }
+            data.questions.push(newQ);
+
         } else {
+            // Incoming built-in or new quiz format: { text, right_answer, other_answers, maybe media }
             const allChoices = [...q.other_answers, q.right_answer];
             shuffleArray(allChoices);
-            data.questions.push({
+            const newQ = {
                 text: q.text,
                 choices: allChoices,
                 answer: allChoices.indexOf(q.right_answer)
-            });
+            };
+            if (q.media) {
+                newQ.media = q.media;
+            }
+            data.questions.push(newQ);
         }
     });
     return data;

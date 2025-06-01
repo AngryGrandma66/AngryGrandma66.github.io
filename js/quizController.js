@@ -1,8 +1,8 @@
-// js/quizControllerUI.js
+// js/quizController.js
 import { loadQuizData } from './dataService.js';
 import { playMusic, stopMusic, playFinishSound } from './audioController.js';
 
-const TIME_LIMIT = 15; // seconds per question
+const TIME_LIMIT = 15; // default seconds per question
 
 export class QuizController {
     constructor({
@@ -10,16 +10,26 @@ export class QuizController {
                     onQuestionRendered,
                     onQuizFinished
                 }) {
-        this.onQuizLoaded = onQuizLoaded;
+        this.onQuizLoaded       = onQuizLoaded;
         this.onQuestionRendered = onQuestionRendered;
-        this.onQuizFinished = onQuizFinished;
+        this.onQuizFinished     = onQuizFinished;
 
-        this.currentQuiz = null;
-        this.currentIndex = 0;
-        this.correctCount = 0;
-        this.answers = [];
+        this.currentQuiz   = null;
+        this.currentIndex  = 0;
+        this.correctCount  = 0;
+        this.answers       = [];
         this.questionTimer = null;
-        this.timeLeft = 0;
+        this.timeLeft      = 0;
+    }
+
+    /**
+     * Increase the remaining time for the current question
+     * by extraSeconds. Called by UI when media metadata loads.
+     */
+    extendTimer(extraSeconds) {
+        if (this.questionTimer) {
+            this.timeLeft += extraSeconds;
+        }
     }
 
     /**
@@ -34,11 +44,11 @@ export class QuizController {
             this.questionTimer = null;
         }
         stopMusic();
-        this.currentQuiz = null;
+        this.currentQuiz  = null;
         this.currentIndex = 0;
         this.correctCount = 0;
-        this.answers = [];
-        this.timeLeft = 0;
+        this.answers      = [];
+        this.timeLeft     = 0;
     }
 
     /**
@@ -53,10 +63,10 @@ export class QuizController {
 
         loadQuizData(topic)
             .then(data => {
-                this.currentQuiz = data;
-                this.currentIndex = 0;
-                this.correctCount = 0;
-                this.answers = [];
+                this.currentQuiz   = data;
+                this.currentIndex  = 0;
+                this.correctCount  = 0;
+                this.answers       = [];
                 playMusic();
                 this.onQuizLoaded(data);
                 this._renderCurrentQuestion();
@@ -66,28 +76,30 @@ export class QuizController {
             });
     }
 
-    /** Internal: render the current question and start its 15s timer */
+    /** Internal: render the current question and start its timer */
     _renderCurrentQuestion() {
         clearInterval(this.questionTimer);
 
         const totalQ = this.currentQuiz.questions.length;
-        const qObj = this.currentQuiz.questions[this.currentIndex];
+        const qObj   = this.currentQuiz.questions[this.currentIndex];
 
+        // Initialize timeLeft to TIME_LIMIT (media will add on via extendTimer)
         this.timeLeft = TIME_LIMIT;
         this.onQuestionRendered({
             question: qObj,
-            index: this.currentIndex,
-            total: totalQ,
-            timeLeft: this.timeLeft,
+            index:    this.currentIndex,
+            total:    totalQ,
+            timeLeft: this.timeLeft
         });
 
+        // Start countdown
         this.questionTimer = setInterval(() => {
             this.timeLeft -= 1;
             this.onQuestionRendered({
                 question: qObj,
-                index: this.currentIndex,
-                total: totalQ,
-                timeLeft: this.timeLeft,
+                index:    this.currentIndex,
+                total:    totalQ,
+                timeLeft: this.timeLeft
             });
             if (this.timeLeft <= 0) {
                 clearInterval(this.questionTimer);
@@ -109,8 +121,8 @@ export class QuizController {
 
         this.onQuestionRendered({
             question: qObj,
-            index: this.currentIndex,
-            total: this.currentQuiz.questions.length,
+            index:    this.currentIndex,
+            total:    this.currentQuiz.questions.length,
             timeLeft: this.timeLeft,
             selected: true,
             isCorrect,
@@ -118,13 +130,13 @@ export class QuizController {
         });
     }
 
-    /** Internal: When the 15s timer runs out, mark as incorrect. */
+    /** Internal: When the timer reaches zero, mark as incorrect. */
     _autoSkip() {
         this.answers.push(false);
         this.onQuestionRendered({
             question: this.currentQuiz.questions[this.currentIndex],
-            index: this.currentIndex,
-            total: this.currentQuiz.questions.length,
+            index:    this.currentIndex,
+            total:    this.currentQuiz.questions.length,
             timeLeft: 0,
             timedOut: true
         });
