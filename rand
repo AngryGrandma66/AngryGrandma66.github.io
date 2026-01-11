@@ -1,0 +1,52 @@
+#!/bin/sh
+
+OUTPUT_FILE="/var/www/localhost/htdocs/index.html"
+
+cat << EOF > $OUTPUT_FILE
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firewall Statistics</title>
+    <meta http-equiv="refresh" content="120">
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background:  #f5f5f5; }
+        h1 { color: #333; }
+        table { border-collapse: collapse; width: 60%; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #4CAF50; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        .timestamp { color: #666; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <h1>🔥 Firewall Drop Statistics</h1>
+    <p class="timestamp">Last updated: $(date '+%Y-%m-%d %H:%M:%S')</p>
+    <p>Dropped NEW TCP connections from 192.168.55.0/24 → 192.168.50.0/24</p>
+    <table>
+        <tr><th>Source IP</th><th>Dropped Packets</th></tr>
+EOF
+
+# Extract and count dropped packets by source IP from kernel log
+dmesg | grep "FW_DROP:" | grep -oE "SRC=[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | \
+    cut -d= -f2 | sort | uniq -c | sort -rn | \
+    while read count ip; do
+        echo "        <tr><td>$ip</td><td>$count</td></tr>" >> $OUTPUT_FILE
+    done
+
+# Also check /var/log/messages if available
+if [ -f /var/log/messages ]; then
+    grep "FW_DROP:" /var/log/messages 2>/dev/null | \
+        grep -oE "SRC=[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | \
+        cut -d= -f2 | sort | uniq -c | sort -rn | \
+        while read count ip; do
+            echo "        <tr><td>$ip</td><td>$count</td></tr>" >> $OUTPUT_FILE
+        done
+fi
+
+cat << 'EOF' >> $OUTPUT_FILE
+    </table>
+    <p><em>Auto-refreshes every 2 minutes</em></p>
+</body>
+</html>
+EOF
