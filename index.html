@@ -1,204 +1,419 @@
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="en" data-bs-theme="dark">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Geografie Kvízy</title>
-    <link rel="stylesheet" href="css/styles.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚔️ Combat Simulation</title>
+
+    <!-- Bootstrap 5 Darkly Theme -->
+    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/darkly/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
+    <style>
+        body {
+            padding-bottom: 2rem;
+        }
+        .card {
+            height: 100%;
+        }
+        .config-card .card-body {
+            padding: 1rem;
+        }
+        .form-label {
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+        .chart-container {
+            height: 400px;
+        }
+        .slider-container {
+            padding: 0 0.5rem;
+        }
+        .slider-value {
+            font-weight: bold;
+            min-width: 45px;
+            display: inline-block;
+            text-align: right;
+        }
+        .results-summary h4 {
+            border-bottom: 2px solid;
+            padding-bottom: 0.5rem;
+        }
+        .results-summary .text-primary {
+            border-color: var(--bs-primary);
+        }
+        .results-summary .text-danger {
+            border-color: var(--bs-danger);
+        }
+        #loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        #loading-overlay.show {
+            display: flex;
+        }
+        .loading-content {
+            text-align: center;
+            color: white;
+        }
+        .loading-content .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        .deck-help {
+            font-size: 0.75rem;
+            color: var(--bs-secondary);
+        }
+        .invalid-feedback-custom {
+            display: block;
+            color: var(--bs-danger);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+    </style>
 </head>
 <body>
-<header></header>
-
-<!-- ===================== Navbar ===================== -->
-<nav id="main-nav">
-    <div class="nav-container">
-        <div class="nav-left">
-            <span class="nav-title">
-                <span class="title-icon">🌍</span>
-                Geografie Kvízy
-            </span>
-
-            <div class="player-input-group">
-                <input id="player-name" type="text" maxlength="10" placeholder="Jméno / Iniciály" />
+    <!-- Loading Overlay -->
+    <div id="loading-overlay">
+        <div class="loading-content">
+            <div class="spinner-border text-primary mb-3" role="status">
+                <span class="visually-hidden">Loading...</span>
             </div>
-
-            <div class="audio-controls">
-                <button id="toggle-music-btn" class="audio-btn" aria-label="Mute music">
-                    <svg id="music-icon" width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path id="music-note" d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z" fill="currentColor" />
-                        <line id="music-slash" x1="4" y1="4" x2="20" y2="20" stroke="currentColor" stroke-width="2" visibility="hidden" />
-                    </svg>
-                </button>
-
-                <button id="toggle-effects-btn" class="audio-btn" aria-label="Mute effects">
-                    <svg id="effects-icon" width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path id="effects-speaker" d="M3 9v6h4l5 5V4L7 9H3z" fill="currentColor" />
-                        <path id="effects-waves" d="M14.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.74 2.5-2.26 2.5-4.02z" fill="currentColor" />
-                        <line id="effects-slash" x1="4" y1="4" x2="20" y2="20" stroke="currentColor" stroke-width="2" visibility="hidden" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-
-        <div class="nav-right">
-            <button id="nav-home" class="nav-btn">
-                <span>🏠</span>
-                Domů
-            </button>
-            <button id="nav-scores" class="nav-btn">
-                <span>🏆</span>
-                Žebříček
-            </button>
-            <button id="nav-manage" class="nav-btn">
-                <span>⚙️</span>
-                Spravovat
-            </button>
+            <h5>Running Simulation...</h5>
+            <p id="loading-progress">0 / 100 runs</p>
         </div>
     </div>
-</nav>
 
-<main>
-    <!-- =================== Home / Quiz selection =================== -->
-    <section id="home-screen" class="active">
-        <div class="home-header">
-            <h1>Vyberte kvíz</h1>
-            <p>Otestujte své znalosti zeměpisu</p>
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="row">
+            <div class="col-12 text-center my-4">
+                <h1>⚔️ Combat Simulation</h1>
+                <p class="text-muted">Turn-based card combat simulator with statistical analysis</p>
+            </div>
         </div>
 
-        <div id="home-controls" class="home-controls">
-            <button id="create-quiz-btn" class="control-btn create-btn">
-                <span>➕</span>
-                Vytvořit kvíz
-            </button>
-            <button id="import-quiz-btn" class="control-btn import-btn">
-                <span>📁</span>
-                Importovat kvíz
-            </button>
-            <input type="file" id="import-file-input" accept=".json" />
-        </div>
-
-        <nav class="quiz-list"></nav>
-    </section>
-
-    <!-- =================== Quiz screen =================== -->
-    <section id="quiz-screen">
-        <div class="quiz-header">
-            <h2 id="quiz-title"></h2>
-            <div id="progress-container">
-                <div class="progress-info">
-                    <span id="progress-text">Otázka 0/0</span>
-                    <span id="timer" class="timer">0s</span>
-                </div>
-                <div class="progress-bar-container">
-                    <progress id="progress-bar" value="0" max="0"></progress>
+        <!-- Error Alert -->
+        <div class="row">
+            <div class="col-12">
+                <div id="error-alert" class="alert alert-danger alert-dismissible fade" role="alert" style="display: none;">
+                    <strong>Error:</strong> <span id="error-message"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             </div>
         </div>
 
-        <article id="question-card" class="question-card">
-            <div id="media-container" class="media-container"></div>
-            <div class="question-content">
-                <p id="question-text"></p>
-                <ul id="choices-list"></ul>
-            </div>
-        </article>
+        <!-- Configuration Row -->
+        <div class="row mb-3">
+            <!-- Protagonist Config -->
+            <div class="col-md-4 mb-3">
+                <div class="card config-card border-primary">
+                    <div class="card-header">
+                        <h5 class="mb-0">Protagonist</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Deck Input -->
+                        <div class="mb-2">
+                            <label for="protagonist-deck" class="form-label">Deck</label>
+                            <input type="text" class="form-control form-control-sm" id="protagonist-deck"
+                                   value="2s 3s 4s 5s 2d 3d 4d 2c 3c 4c 2h 3h"
+                                   placeholder="2s 3s 4d 5h...">
+                            <div class="deck-help">Format: &lt;value&gt;&lt;suit&gt; (s=Spades, d=Diamonds, c=Crosses, h=Hearts)</div>
+                        </div>
 
-        <footer class="quiz-footer">
-            <button id="next-btn" class="next-btn" disabled>Další</button>
-        </footer>
-    </section>
+                        <!-- AC and Hit Bonus -->
+                        <div class="row mb-2">
+                            <div class="col-6">
+                                <label for="protagonist-ac" class="form-label">Armor Class (AC)</label>
+                                <input type="number" class="form-control form-control-sm" id="protagonist-ac"
+                                       value="10" min="0" max="30">
+                            </div>
+                            <div class="col-6">
+                                <label for="protagonist-hit-bonus" class="form-label">Hit Bonus</label>
+                                <input type="number" class="form-control form-control-sm" id="protagonist-hit-bonus"
+                                       value="0" min="-10" max="20">
+                            </div>
+                        </div>
 
-    <!-- =================== Results screen =================== -->
-    <section id="results-screen">
-        <div class="results-container">
-            <div class="results-header">
-                <h2>🎉 Výsledky</h2>
-                <p id="score-text" class="score-text"></p>
-            </div>
-            <div class="chart-container">
-                <canvas id="resultsChart" width="400" height="300"></canvas>
-            </div>
-            <footer class="results-footer">
-                <button id="home-btn" class="home-btn">Zpět na domovskou</button>
-            </footer>
-        </div>
-    </section>
+                        <!-- Reaction and Counter Chance -->
+                        <div class="row mb-2">
+                            <div class="col-6">
+                                <label class="form-label">Reaction: <span class="slider-value" id="protagonist-reaction-value">50%</span></label>
+                                <input type="range" class="form-range" id="protagonist-reaction-chance"
+                                       min="0" max="1" step="0.05" value="0.5">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Counter: <span class="slider-value" id="protagonist-counter-value">30%</span></label>
+                                <input type="range" class="form-range" id="protagonist-counter-chance"
+                                       min="0" max="1" step="0.05" value="0.3">
+                            </div>
+                        </div>
 
-    <!-- =================== High‐Score screen =================== -->
-    <section id="scores-screen">
-        <div class="scores-container">
-            <div class="scores-header">
-                <h2>🏆 Žebříček</h2>
-            </div>
-            <div class="scores-content">
-                <ul id="high-score-list"></ul>
-            </div>
-            <footer class="scores-footer">
-                <button id="scores-home-btn" class="home-btn">Zpět na domovskou</button>
-            </footer>
-        </div>
-    </section>
+                        <!-- Resources and Danger -->
+                        <div class="row mb-2">
+                            <div class="col-6">
+                                <label for="protagonist-resources" class="form-label">Base Resources</label>
+                                <input type="number" class="form-control form-control-sm" id="protagonist-resources"
+                                       value="10" min="0" max="50">
+                            </div>
+                            <div class="col-6">
+                                <label for="protagonist-danger" class="form-label">Danger Level</label>
+                                <input type="number" class="form-control form-control-sm" id="protagonist-danger"
+                                       value="3" min="1" max="10">
+                            </div>
+                        </div>
 
-    <!-- =================== Control Panel screen =================== -->
-    <section id="control-panel-screen">
-        <div class="control-container">
-            <div class="control-header">
-                <h2>⚙️ Správa vlastních kvízů</h2>
-            </div>
-            <div class="control-content">
-                <ul id="control-panel-list"></ul>
-            </div>
-            <footer class="control-footer">
-                <button id="control-home-btn" class="home-btn">Zpět na domovskou</button>
-            </footer>
-        </div>
-    </section>
-
-    <!-- =================== Authoring screen =================== -->
-    <section id="authoring-screen">
-        <div class="authoring-container">
-            <div class="authoring-header">
-                <h2>✏️ Vytvořit / Upravit kvíz</h2>
-            </div>
-            <form id="authoring-form" class="authoring-form">
-                <div class="form-group">
-                    <label for="new-quiz-name">Název kvízu:</label>
-                    <input id="new-quiz-name" type="text" required maxlength="30" />
+                        <!-- Strategy -->
+                        <div class="mb-0">
+                            <label for="protagonist-strategy" class="form-label">Strategy</label>
+                            <select class="form-select form-select-sm" id="protagonist-strategy">
+                                <option value="random" selected>Random</option>
+                                <option value="conservative">Conservative</option>
+                                <option value="aggressive">Aggressive</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
+            </div>
 
-                <div id="questions-container" class="questions-container"></div>
+            <!-- Antagonist Config -->
+            <div class="col-md-4 mb-3">
+                <div class="card config-card border-danger">
+                    <div class="card-header">
+                        <h5 class="mb-0">Antagonist</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Deck Input -->
+                        <div class="mb-2">
+                            <label for="antagonist-deck" class="form-label">Deck</label>
+                            <input type="text" class="form-control form-control-sm" id="antagonist-deck"
+                                   value="2s 3s 4s 5s 2d 3d 4d 2c 3c 4c 2h 3h"
+                                   placeholder="2s 3s 4d 5h...">
+                            <div class="deck-help">Format: &lt;value&gt;&lt;suit&gt; (s=Spades, d=Diamonds, c=Crosses, h=Hearts)</div>
+                        </div>
 
-                <div class="form-actions">
-                    <button type="button" id="add-question-btn" class="action-btn add-btn">
-                        <span>➕</span>
-                        Přidat otázku
-                    </button>
-                    <div class="save-actions">
-                        <button type="button" id="save-quiz-btn" class="action-btn save-btn">
-                            <span>💾</span>
-                            Uložit kvíz
-                        </button>
-                        <button type="button" id="export-quiz-btn" class="action-btn export-btn">
-                            <span>📤</span>
-                            Exportovat kvíz
+                        <!-- AC and Hit Bonus -->
+                        <div class="row mb-2">
+                            <div class="col-6">
+                                <label for="antagonist-ac" class="form-label">Armor Class (AC)</label>
+                                <input type="number" class="form-control form-control-sm" id="antagonist-ac"
+                                       value="10" min="0" max="30">
+                            </div>
+                            <div class="col-6">
+                                <label for="antagonist-hit-bonus" class="form-label">Hit Bonus</label>
+                                <input type="number" class="form-control form-control-sm" id="antagonist-hit-bonus"
+                                       value="0" min="-10" max="20">
+                            </div>
+                        </div>
+
+                        <!-- Reaction and Counter Chance -->
+                        <div class="row mb-2">
+                            <div class="col-6">
+                                <label class="form-label">Reaction: <span class="slider-value" id="antagonist-reaction-value">50%</span></label>
+                                <input type="range" class="form-range" id="antagonist-reaction-chance"
+                                       min="0" max="1" step="0.05" value="0.5">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Counter: <span class="slider-value" id="antagonist-counter-value">30%</span></label>
+                                <input type="range" class="form-range" id="antagonist-counter-chance"
+                                       min="0" max="1" step="0.05" value="0.3">
+                            </div>
+                        </div>
+
+                        <!-- Resources and Danger -->
+                        <div class="row mb-2">
+                            <div class="col-6">
+                                <label for="antagonist-resources" class="form-label">Base Resources</label>
+                                <input type="number" class="form-control form-control-sm" id="antagonist-resources"
+                                       value="10" min="0" max="50">
+                            </div>
+                            <div class="col-6">
+                                <label for="antagonist-danger" class="form-label">Danger Level</label>
+                                <input type="number" class="form-control form-control-sm" id="antagonist-danger"
+                                       value="3" min="1" max="10">
+                            </div>
+                        </div>
+
+                        <!-- Strategy -->
+                        <div class="mb-0">
+                            <label for="antagonist-strategy" class="form-label">Strategy</label>
+                            <select class="form-select form-select-sm" id="antagonist-strategy">
+                                <option value="random" selected>Random</option>
+                                <option value="conservative">Conservative</option>
+                                <option value="aggressive">Aggressive</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Simulation Controls -->
+            <div class="col-md-4 mb-3">
+                <div class="card config-card border-success">
+                    <div class="card-header">
+                        <h5 class="mb-0">Simulation Controls</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Number of Turns and Starting Player -->
+                        <div class="row mb-2">
+                            <div class="col-6">
+                                <label for="num-turns" class="form-label">Number of Turns</label>
+                                <input type="number" class="form-control form-control-sm" id="num-turns"
+                                       value="10" min="1" max="100">
+                            </div>
+                            <div class="col-6">
+                                <label for="starting-player" class="form-label">Starting Player</label>
+                                <select class="form-select form-select-sm" id="starting-player">
+                                    <option value="protagonist" selected>Protagonist</option>
+                                    <option value="antagonist">Antagonist</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Mode and Batch Size -->
+                        <div class="row mb-2">
+                            <div class="col-6">
+                                <label class="form-label">Mode</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="simulation-mode"
+                                           id="mode-single" value="single" checked>
+                                    <label class="form-check-label" for="mode-single">Single Run</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="simulation-mode"
+                                           id="mode-batch" value="batch">
+                                    <label class="form-check-label" for="mode-batch">Batch Mode</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label for="batch-size" class="form-label">Batch Size</label>
+                                <input type="number" class="form-control form-control-sm" id="batch-size"
+                                       value="100" min="10" max="1000">
+                                <div class="deck-help">Only used in batch mode</div>
+                            </div>
+                        </div>
+
+                        <!-- Use Async Checkbox -->
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="use-async" checked>
+                                <label class="form-check-label" for="use-async">
+                                    Use async processing (prevents UI freeze)
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Run Button -->
+                        <button type="button" class="btn btn-success w-100" id="run-button">
+                            <span class="btn-text">▶ Run Simulation</span>
+                            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                         </button>
                     </div>
                 </div>
-            </form>
-            <footer class="authoring-footer">
-                <button id="authoring-home-btn" class="home-btn">Zpět na domovskou</button>
-            </footer>
+            </div>
         </div>
-    </section>
 
-    <!-- =================== Audio elements =================== -->
-    <audio id="bgMusic" src="media/background-music.mp3" loop preload="auto"></audio>
-    <audio id="finishSound" src="media/finish-sound.mp3" preload="auto"></audio>
-</main>
+        <!-- Results Summary -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div id="results-summary" class="results-summary">
+                            <p class="text-muted text-center mb-0">Run a simulation to see results</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<script type="module" src="js/app.js"></script>
+        <!-- Graphs Row 1 -->
+        <div class="row mb-3">
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-header">Damage Over Time</div>
+                    <div class="card-body">
+                        <div id="damage-graph" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-header">Resource Depletion</div>
+                    <div class="card-body">
+                        <div id="resources-graph" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphs Row 2 -->
+        <div class="row mb-3">
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-header">Damage Statistics</div>
+                    <div class="card-body">
+                        <div id="damage-stats-graph" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-header">Card Exhaustion</div>
+                    <div class="card-body">
+                        <div id="cards-graph" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphs Row 3 -->
+        <div class="row mb-3">
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-header">Reaction Frequency</div>
+                    <div class="card-body">
+                        <div id="reactions-graph" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-header">Damage Distribution (Batch Mode)</div>
+                    <div class="card-body">
+                        <div id="distribution-graph" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="row">
+            <div class="col-12 text-center text-muted">
+                <hr>
+                <p class="small">
+                    Card Combat Simulator |
+                    <a href="https://github.com/AngryGrandma66/AngryGrandma66.github.io" target="_blank">GitHub</a> |
+                    Suits: ♠ Spades (normal) | ♦ Diamonds (+2 reaction cost) | ♣ Crosses (+2 hit) | ♥ Hearts (+2 damage)
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Application Scripts (ES6 Modules) -->
+    <script type="module" src="js/app.js"></script>
 </body>
 </html>
+
